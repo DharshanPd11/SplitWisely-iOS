@@ -5,6 +5,8 @@
 ## User settings
 .DS_Store
 DerivedData/
+xcuserdata/
+*.xcuserdatad
 *.xcworkspace
 *.xcworkspace/xcuserdata/
 *.xcuserstate
