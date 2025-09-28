@@ -8,15 +8,19 @@
 import SwiftUI
 
 struct GroupsView: View {
-    let rows: [GroupDisplayCardView] = [GroupDisplayCardView(id: 0, item: GroupDisplayItem(id: "0", icon: "", name: "Munnar", status: .settled)),GroupDisplayCardView(id: 1, item: GroupDisplayItem(id: "0", icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending)),GroupDisplayCardView(id: 2, item: GroupDisplayItem(id: "0", icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming)),GroupDisplayCardView(id: 3, item: GroupDisplayItem(id: "0", icon: "", name: "Andaman and Nicobar", status: .noExpense)), GroupDisplayCardView(id: 0, item: GroupDisplayItem(id: "0", icon: "", name: "Munnar", status: .settled)),GroupDisplayCardView(id: 1, item: GroupDisplayItem(id: "0", icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending)),GroupDisplayCardView(id: 2, item: GroupDisplayItem(id: "0", icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming)),GroupDisplayCardView(id: 3, item: GroupDisplayItem(id: "0", icon: "", name: "Andaman and Nicobar", status: .noExpense))]
+    @State private var createGroupIsPresenting = false
+    @ObservedObject private var viewModel: GroupsViewModel = GroupsViewModel()
+    
+    var rows: [GroupDisplayCardView] = []
     
     var body: some View {
+        
         NavigationSplitView {
-            List(rows) { group in
+            List(viewModel.groups) { group in
                 NavigationLink {
 //                    DetailView()
                 } label: {
-                    group
+                    GroupDisplayCardView(id: group.id, item: group)
                 }
             }
 //            .listStyle(.plain)
@@ -28,19 +32,30 @@ struct GroupsView: View {
                     Button(action: {}) {
                         Image(systemName: "arrow.up.and.down.text.horizontal")
                     }
-                    Button(action: {}) {
+                    Button(action: {
+                        createGroupIsPresenting = true
+                    }) {
                         Image(systemName: "plus")
                     }
                 }
             }
-
-            
         }
         
         detail: {
             Text("Select a Group to view details")
         }
+        .fullScreenCover(isPresented: $createGroupIsPresenting,
+                         onDismiss: didDismiss) {
+            CreateGroup{ newGroup in
+                viewModel.addGroup(newGroup)
+            }
+        }
     }
+    
+    func didDismiss() {
+        
+    }
+
 }
 
 #Preview {

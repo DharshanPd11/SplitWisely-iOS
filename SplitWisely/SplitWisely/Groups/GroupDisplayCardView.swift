@@ -23,10 +23,11 @@ enum ExpenseStatus {
     }
 }
 
-struct GroupDisplayItem{
-    var id: String
+struct GroupDisplayItem: Identifiable{
+    var id: Int
     var icon: String
     var name: String
+    var image: Image?
     var expense: Amount?
     var status: ExpenseStatus
 }
@@ -72,6 +73,6 @@ struct GroupDisplayCardView: View, Identifiable {
 }
 
 #Preview {
-    let item = GroupDisplayItem(id: "", icon: "", name: "MunnarMunnarMunnarMunnarMunnarMunnarMunnar", expense: Amount(value: -100, currencyCode: "INR") ,status: .incoming)
+    let item = GroupDisplayItem(id: 0, icon: "", name: "MunnarMunnarMunnarMunnarMunnarMunnarMunnar", expense: Amount(value: -100, currencyCode: "INR") ,status: .incoming)
     GroupDisplayCardView(id: 0, item: item)
 }
