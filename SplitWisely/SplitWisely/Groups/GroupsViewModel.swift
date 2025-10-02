@@ -16,3 +16,19 @@ final class GroupsViewModel: ObservableObject {
         groups.append(group)
     }
 }
+
+enum GroupSettlementStatus: String, Codable {
+    case settled
+    case pending
+    case incoming
+    case noExpense
+    
+    var title: String {
+        switch self {
+        case .settled: return "Settled"
+        case .pending: return "Settle up"
+        case .noExpense: return "No Expenses"
+        case .incoming: return "Owed to you"
+        }
+    }
+}

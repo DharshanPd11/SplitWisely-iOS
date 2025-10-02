@@ -39,23 +39,38 @@ struct CreateGroup: View {
     var onSave: (GroupDisplayItem) -> Void
 
     var body: some View {
+            
         NavigationStack {
-            VStack{
-                HStack{
-                    GroupImageButton(selectedImage: $viewModel.selectedImage, showPicker: $showPicker)
-                    GroupNameField(name: $viewModel.name)
-                }
-                .photosPicker(isPresented: $showPicker, selection: $selectedItem, matching: .images)
-                .onChange(of: selectedItem) { newItem in
-                    Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self),
-                           let uiImage = UIImage(data: data) {
-                            viewModel.selectedImage = uiImage
+            ScrollView {
+                VStack {
+                    HStack{
+                        GroupImageButton(selectedImage: $viewModel.selectedImage, showPicker: $showPicker)
+                        GroupNameField(name: $viewModel.name)
+                    }
+                    .photosPicker(isPresented: $showPicker, selection: $selectedItem, matching: .images)
+                    .onChange(of: selectedItem) { newItem in
+                        Task {
+                            if let data = try? await newItem?.loadTransferable(type: Data.self),
+                               let uiImage = UIImage(data: data) {
+                                viewModel.selectedImage = uiImage
+                            }
                         }
                     }
-                }                .padding()
-                .navigationTitle("Add a new Group")
-                .navigationBarTitleDisplayMode(.inline)
+                    .padding()
+                    .navigationTitle("Add a new Group")
+                    .navigationBarTitleDisplayMode(.inline)
+                    VStack(alignment: .leading){
+                        Text("Type")
+                            .font(.headline)
+                            .padding(.leading)
+                        IconGrid(selectedGroupType: $viewModel.selectedGroupType)
+                    }
+                    Spacer()
+                    
+                }
+                .background{
+                    Color(.systemBackground)
+                }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button("Cancel") {
@@ -65,28 +80,16 @@ struct CreateGroup: View {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Done") {
                             let group = viewModel.buildGroup()
-                                onSave(group)
-                                dismiss()
+                            onSave(group)
+                            dismiss()
                         }
                         .bold()
                     }
                 }
-                VStack(alignment: .leading){
-                    
-                    Text("Type")
-                        .font(.title3)
-                    
-                    IconGrid(selectedGroupType: $viewModel.selectedGroupType)
-                }
-                .padding()
-                Spacer()
-                
             }
-            .background{
-                Color(.systemBackground)
-            }
+            .environmentObject(viewModel)
         }
-        .environmentObject(viewModel)
+            .ignoresSafeArea(.keyboard)
     }
 }
 
