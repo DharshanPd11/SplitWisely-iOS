@@ -10,8 +10,16 @@ import PhotosUI
 import Combine
 
 final class CreateGroupViewModel: ObservableObject {
+    
     @Published var name: String = ""
     @Published var selectedImage: UIImage?
+    @Published var selectedGroupType: GroupType = .none
+    @Published var startDate: Date = Date()
+    @Published var endDate: Date = Calendar.current.date(byAdding: .day, value: 7, to: Date())!
+    
+    func selectGroupType(_ type: GroupType) {
+        selectedGroupType = type
+    }
     
     func buildGroup() -> GroupDisplayItem {
         GroupDisplayItem(id: 10, icon: "", name: name, image: Image(uiImage: selectedImage ?? UIImage()), status: .noExpense)
@@ -19,8 +27,9 @@ final class CreateGroupViewModel: ObservableObject {
 }
 
 struct CreateGroup: View {
+    
+    @State private var selectedImage: Image? = nil    
     @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var selectedImage: Image? = nil
     @State private var showPicker: Bool = false
 
     @ObservedObject private var viewModel = CreateGroupViewModel()
@@ -33,7 +42,7 @@ struct CreateGroup: View {
         NavigationStack {
             VStack{
                 HStack{
-                    GroupImageButton(selectedImage: $selectedImage, showPicker: $showPicker)
+                    GroupImageButton(selectedImage: $viewModel.selectedImage, showPicker: $showPicker)
                     GroupNameField(name: $viewModel.name)
                 }
                 .photosPicker(isPresented: $showPicker, selection: $selectedItem, matching: .images)
@@ -67,7 +76,7 @@ struct CreateGroup: View {
                     Text("Type")
                         .font(.title3)
                     
-                    IconGrid()
+                    IconGrid(selectedGroupType: $viewModel.selectedGroupType)
                 }
                 .padding()
                 Spacer()
@@ -77,17 +86,18 @@ struct CreateGroup: View {
                 Color(.systemBackground)
             }
         }
+        .environmentObject(viewModel)
     }
 }
 
 struct GroupImageButton: View {
-    @Binding var selectedImage: Image?
+    @Binding var selectedImage: UIImage?
     @Binding var showPicker: Bool
 
     var body: some View {
         Button(action: { showPicker = true }) {
-            if let selectedImage = selectedImage {
-                selectedImage
+            if let uiImage = selectedImage {
+                Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 60, height: 60)
@@ -128,22 +138,9 @@ struct GroupNameField: View {
     }
 }
 
-struct GroupTypeDisplayable: Identifiable {
-    let id = UUID()
-    var type: GroupType
-    let systemName: String
-    let description: String
-}
-
-enum GroupType: String, CaseIterable {
-    case trip
-    case couple
-    case friends
-    case others
-    case home
-}
-
 struct IconGrid: View {
+    @Binding var selectedGroupType: GroupType
+    
     let icons: [GroupTypeDisplayable] = [
         .init(type: .home, systemName: "house", description: "Home"),
         .init(type: .trip, systemName: "airplane.departure", description: "Trip"),
@@ -151,13 +148,8 @@ struct IconGrid: View {
         .init(type: .friends, systemName: "person.2", description: "Friends"),
         .init(type: .others, systemName: "plus", description: "Others"),
     ]
-    
-    let rows = [
-        GridItem(.fixed(100))
-    ]
-    
-    @State private var selectedIconID: UUID?
-    
+    let rows = [ GridItem(.fixed(100)) ]
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHGrid(rows: rows, spacing: 20) {
@@ -166,37 +158,49 @@ struct IconGrid: View {
                         Image(systemName: icon.systemName)
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 40)
-                            .padding()
-                            .foregroundColor(.white)
+                            .frame(width: 25, height: 25)
+                            .padding(.top)
+                            .foregroundColor(.secondary)
                             .background(.clear)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                         
                         Text(icon.description)
-                            .font(.headline)
+                            .font(.subheadline)
+                        
                         Spacer()
                     }
-                    .padding()
-                    .frame(width: 100, height: 100)
+                    .frame(width: 80, height: 80)
                     .background(Color.clear)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(
-                            selectedIconID == icon.id ? .red : Color(.label),
-                            lineWidth: 2
-                        )
+                                selectedGroupType == icon.type ? .red : Color(.label),
+                                lineWidth: 2
+                            )
                     )
                     .onTapGesture {
-                        selectedIconID = icon.id
+                        if selectedGroupType == icon.type {
+                            selectedGroupType = .none
+                        } else {
+                            selectedGroupType = icon.type
+                        }
                     }
                 }
             }
             .padding()
         }
+        GroupTypeDetailView(type: selectedGroupType)
+            .id(selectedGroupType)
+            .cornerRadius(12)
+            .animation(.smooth, value: selectedGroupType)
     }
 }
 
 #Preview {
-    IconGrid()
+    @ObservedObject var viewModel = CreateGroupViewModel()
+
+    IconGrid(selectedGroupType: $viewModel.selectedGroupType)
+        .environmentObject(viewModel)
+
 }

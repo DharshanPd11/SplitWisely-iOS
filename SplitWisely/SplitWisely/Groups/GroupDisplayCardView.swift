@@ -38,9 +38,16 @@ struct GroupDisplayCardView: View, Identifiable {
     
     var body: some View {
         HStack {
-            Image(systemName: "airplane.circle.fill")
-                .resizable()
-                .frame(width: 50, height: 50)
+            if let image = item.image {
+                image
+                    .resizable()
+                    .frame(width: 50, height: 50)
+            } else {
+                Image(systemName: "airplane.circle.fill")
+                    .resizable()
+                    .frame(width: 50, height: 50)
+            }
+            
             Text(item.name)
                 .padding()
                 .lineLimit(2)
