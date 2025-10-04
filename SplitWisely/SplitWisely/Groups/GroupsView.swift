@@ -18,7 +18,7 @@ struct GroupsView: View {
         NavigationSplitView {
             List(viewModel.groups) { group in
                 NavigationLink {
-//                    DetailView()
+                    AllExpensesView(viewModel: ExpenseViewModel(title: group.name, expenses: DummyData().getExpenses()))
                 } label: {
                     GroupDisplayCardView(id: group.id, item: group)
                 }

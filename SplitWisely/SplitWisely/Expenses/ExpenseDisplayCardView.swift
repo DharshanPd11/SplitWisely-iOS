@@ -49,18 +49,17 @@ struct ExpenseCardView: View {
                     .font(.headline)
                 Text(item.date.formatted(.dateTime.day()))
             }
-            .frame(width: .infinity, height: 70)
-            .background(Color(.secondarySystemBackground))
+            .foregroundStyle(.secondary)
             .lineLimit(1)
             
             if let image = item.image {
                 image
                     .resizable()
-                    .frame(width: 50, height: 50)
+                    .frame(width: 48, height: 48)
             } else {
                 Image(systemName: "fork.knife.circle.fill")
                     .resizable()
-                    .frame(width: 50, height: 50)
+                    .frame(width: 48, height: 48)
             }
 
 
@@ -73,7 +72,6 @@ struct ExpenseCardView: View {
                     .font(.subheadline)
             }
             .truncationMode(.tail)
-            .padding()
 
             Spacer()
             
@@ -94,7 +92,6 @@ struct ExpenseCardView: View {
                     .fontWeight(.thin)
             }
         }
-        .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemBackground))
