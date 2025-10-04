@@ -22,7 +22,7 @@ public struct DummyData {
             id: 1,
             title: "Cab Fare",
             description: "Airport to hotel ride",
-            expense: Amount(value: 750, currencyCode: "INR"),
+            expense: Amount(value: -750, currencyCode: "INR"),
             type: .lent,
             date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         ),
@@ -38,7 +38,7 @@ public struct DummyData {
             id: 3,
             title: "Snacks",
             description: "Cafe coffee and snacks",
-            expense: Amount(value: 350, currencyCode: "INR"),
+            expense: Amount(value: -350, currencyCode: "INR"),
             type: .lent,
             date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!
         ),
@@ -62,7 +62,7 @@ public struct DummyData {
             id: 6,
             title: "Cab Fare",
             description: "Airport to hotel ride",
-            expense: Amount(value: 750, currencyCode: "INR"),
+            expense: Amount(value: -750, currencyCode: "INR"),
             type: .lent,
             date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         ),
@@ -78,7 +78,7 @@ public struct DummyData {
             id: 8,
             title: "Snacks",
             description: "Cafe coffee and snacks",
-            expense: Amount(value: 350, currencyCode: "INR"),
+            expense: Amount(value: -350, currencyCode: "INR"),
             type: .lent,
             date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!
         ),
@@ -102,7 +102,7 @@ public struct DummyData {
             id: 11,
             title: "Cab Fare",
             description: "Airport to hotel ride",
-            expense: Amount(value: 750, currencyCode: "INR"),
+            expense: Amount(value: -750, currencyCode: "INR"),
             type: .lent,
             date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         ),
@@ -118,7 +118,7 @@ public struct DummyData {
             id: 13,
             title: "Snacks",
             description: "Cafe coffee and snacks",
-            expense: Amount(value: 350, currencyCode: "INR"),
+            expense: Amount(value: -350, currencyCode: "INR"),
             type: .lent,
             date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!
         ),
@@ -142,7 +142,7 @@ public struct DummyData {
             id: 16,
             title: "Cab Fare",
             description: "Airport to hotel ride",
-            expense: Amount(value: 750, currencyCode: "INR"),
+            expense: Amount(value: -750, currencyCode: "INR"),
             type: .lent,
             date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         ),
@@ -158,7 +158,7 @@ public struct DummyData {
             id: 18,
             title: "Snacks",
             description: "Cafe coffee and snacks",
-            expense: Amount(value: 350, currencyCode: "INR"),
+            expense: Amount(value: -350, currencyCode: "INR"),
             type: .lent,
             date: Calendar.current.date(byAdding: .day, value: -3, to: Date())!
         ),
