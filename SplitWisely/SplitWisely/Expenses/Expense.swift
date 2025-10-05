@@ -23,7 +23,7 @@ struct Expense: Identifiable {
     var paidBy: Participant
     var participants: [Participant]
     
-    var type: ExpenseType
+    var type: ExpenseInvovementType
     
     var note: String?
     var receipt: Image?

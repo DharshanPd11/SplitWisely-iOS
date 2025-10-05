@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum ExpenseType: String, Codable {
+enum ExpenseInvovementType: String, Codable {
     case borrowed
     case lent
     case notInvloved
@@ -33,7 +33,7 @@ struct ExpenseCardView: View {
         var description: String
         var image: Image?
         var expense: Amount?
-        var type: ExpenseType
+        var type: ExpenseInvovementType
         var date: Date
     }
    
@@ -100,5 +100,5 @@ struct ExpenseCardView: View {
 }
 
 #Preview {
-    ExpenseCardView(id: 0, item: ExpenseCardView.DisplayItem(id: 0, title: "Lunch Bill", description: "Day 1 lunch at Taj Coram", expense: Amount(value: 1000, currencyCode: "INR"), type: ExpenseType.borrowed, date: Date()))
+    ExpenseCardView(id: 0, item: ExpenseCardView.DisplayItem(id: 0, title: "Lunch Bill", description: "Day 1 lunch at Taj Coram", expense: Amount(value: 1000, currencyCode: "INR"), type: ExpenseInvovementType.borrowed, date: Date()))
 }

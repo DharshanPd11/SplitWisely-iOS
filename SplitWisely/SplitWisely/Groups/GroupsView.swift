@@ -23,7 +23,7 @@ struct GroupsView: View {
                     GroupDisplayCardView(id: group.id, item: group)
                 }
             }
-//            .listStyle(.plain)
+
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             .navigationTitle("Your Groups")
             .navigationSubtitle("Tap to open")

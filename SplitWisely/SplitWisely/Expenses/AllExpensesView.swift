@@ -11,7 +11,8 @@ struct AllExpensesView: View {
     
     @State private var showAddExpenseSheet: Bool = false
     @ObservedObject var viewModel: ExpenseViewModel
-        
+    @State var selectedCurrency: Currency = AllCurrencies().currentCurrency
+
     var body: some View {
         
         NavigationSplitView {
@@ -43,7 +44,7 @@ struct AllExpensesView: View {
                 HStack {
                     Spacer()
                     Button {
-                        // Add Expense action
+                        showAddExpenseSheet = true
                     } label: {
                         Label("Add expense", systemImage: "plus")
                             .padding()
@@ -55,6 +56,10 @@ struct AllExpensesView: View {
                     .padding()
                 }
             }
+                .fullScreenCover(isPresented: $showAddExpenseSheet,
+                                 onDismiss: didDismiss) {
+                    CreateExpenseView(viewModel: CreateExpenseViewModel())
+                }
         )
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -65,8 +70,13 @@ struct AllExpensesView: View {
                 }
             }
         }
-
     }
+    
+    func didDismiss() {
+        
+    }
+        
+        
 }
 
 
