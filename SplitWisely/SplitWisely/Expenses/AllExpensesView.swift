@@ -37,7 +37,6 @@ struct AllExpensesView: View {
             Text("Select a Group to view details")
         }
 
-//        .navigationTitle("SIkkim Team Trip")
         .overlay(
             VStack {
                 Spacer()
@@ -58,8 +57,8 @@ struct AllExpensesView: View {
             }
                 .fullScreenCover(isPresented: $showAddExpenseSheet,
                                  onDismiss: didDismiss) {
-                    CreateExpenseView(viewModel: CreateExpenseViewModel())
-                }
+                                     CreateExpenseView(viewModel: CreateExpenseViewModel())
+                                 }
         )
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

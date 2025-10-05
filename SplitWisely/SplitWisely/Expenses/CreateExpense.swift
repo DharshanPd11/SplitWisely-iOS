@@ -44,71 +44,82 @@ struct CreateExpenseView: View {
     
     @State var showCurrencies = false
     @State var selectedCurrency: Currency? = AllCurrencies().currentCurrency
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        VStack {
-            HStack {
-                ZStack{
-                    Image(systemName: "list.bullet.rectangle.portrait")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundStyle(.background)
-                        .frame(width: 35, height: 35)
-                }
-                .frame(width: 57, height: 57)
-                .background{
-                    RoundedRectangle(cornerRadius: 5)
-                        .shadow(radius: 5, y: 5)
-                    
-                }
-                VStack{
-                    TextField("Enter Expense Name", text: .constant(""))
-                        .font(.title2)
-                        .padding(.top)
-                    Divider()
-                        .frame(height: 2)
-                        .overlay(.pink)
-                }
-                .padding(.leading)
-                
-            }
-            HStack {
-                Button {
-                    showCurrencies = true
-                } label: {
+        NavigationStack{
+            VStack {
+                HStack {
                     ZStack{
-                        Text(viewModel.currency.symbol)
-                            .font(.system(size: 100))
-                            .minimumScaleFactor(0.1)
-                            .lineLimit(1)
+                        Image(systemName: "list.bullet.rectangle.portrait")
+                            .resizable()
                             .scaledToFit()
                             .foregroundStyle(.background)
+                            .frame(width: 35, height: 35)
+                    }
+                    .frame(width: 50, height: 50)
+                    .background{
+                        RoundedRectangle(cornerRadius: 5)
+                            .shadow(radius: 5, y: 5)
+                        
+                    }
+                    VStack{
+                        TextField("Enter Expense Name", text: .constant(""))
+                            .font(.title2)
+                            .padding(.top)
+                        Divider()
+                            .frame(height: 2)
+                            .overlay(.pink)
+                    }
+                    .padding(.leading)
+                    
+                }
+                HStack {
+                    Button {
+                        showCurrencies = true
+                    } label: {
+                        ZStack{
+                            Text(viewModel.currency.symbol)
+                                .font(.system(size: 100))
+                                .minimumScaleFactor(0.1)
+                                .lineLimit(1)
+                                .scaledToFit()
+                                .foregroundStyle(.background)
+                        }
+                    }
+                    .frame(width: 50, height: 50)
+                    .background{
+                        RoundedRectangle(cornerRadius: 5)
+                            .shadow(radius: 5, y: 5)
+                    }
+                    VStack{
+                        TextField("0.00", text: .constant(""))
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .keyboardType(.numbersAndPunctuation)
+                            .font(.title2)
+                            .padding(.top)
+                        Divider()
+                            .frame(height: 2)
+                            .overlay(.pink)
+                    }
+                    .padding(.leading)
+                    
+                }
+            }
+            .navigationTitle("Add Expense")
+            .toolbar{
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
                     }
                 }
-                .frame(width: 57, height: 57)
-                .background{
-                    RoundedRectangle(cornerRadius: 5)
-                        .shadow(radius: 5, y: 5)
-                }
-                VStack{
-                    TextField("0.00", text: .constant(""))
-                        .font(.system(size: 26))
-                        .fontWeight(.bold)
-                        .keyboardType(.numbersAndPunctuation)
-                        .font(.title2)
-                        .padding(.top)
-                    Divider()
-                        .frame(height: 2)
-                        .overlay(.pink)
-                }
-                .padding(.leading)
-
             }
-        }
-        .padding()
-        .fullScreenCover(isPresented: $showCurrencies,
-                         onDismiss: didDismiss) {
-            AllCurrenciesView(selectedCurrency: $viewModel.currency)
+            .padding()
+            .fullScreenCover(isPresented: $showCurrencies,
+                             onDismiss: didDismiss) {
+                AllCurrenciesView(selectedCurrency: $viewModel.currency)
+            }
         }
     }
     
