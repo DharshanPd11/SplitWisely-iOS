@@ -1,5 +1,5 @@
 //
-//  ParticipantsView.swift
+//  ParticipantCardView.swift
 //  SplitWisely
 //
 //  Created by Priyadharshan Raja on 12/10/25.
@@ -8,15 +8,14 @@
 import SwiftUI
 
 
-public struct ParticipantsView: View {
-//    @ObservedObject var viewModel: ParticipantsViewModel
+public struct ParticipantCardView: View {
     var id: Int
     var item: DisplayItem
     
     struct DisplayItem: Identifiable{
         var id: Int
         var name: String
-        var description: String
+        var description: String?
         var image: Image?
         var expense: Amount?
         var trailingView: ParticipantTrailingViewType
@@ -38,8 +37,8 @@ public struct ParticipantsView: View {
                 Text(item.name)
                     .lineLimit(1)
                     .font(.headline)
-                if !(item.description.isEmpty) {
-                    Text(item.description)
+                if let desc = item.description, desc.isEmpty == false {
+                    Text(desc)
                         .lineLimit(1)
                         .font(.subheadline)
                 }
@@ -49,7 +48,6 @@ public struct ParticipantsView: View {
             Spacer()
             item.trailingView.view
         }
-        .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemBackground))
@@ -78,6 +76,6 @@ enum ParticipantTrailingViewType {
 }
 
 #Preview {
-    ParticipantsView(id: 0, item: ParticipantsView.DisplayItem(id: 0, name: "Manjaarika Kandallu Ravichandscsacsilcjklakscnskalnckasncksancksanclkasnclksa", description: "SOmething", image: Image(systemName: "person.circle"), expense: nil, trailingView: .multiSelect(isSelected: true)))
+    ParticipantCardView(id: 0, item: ParticipantCardView.DisplayItem(id: 0, name: "Manjaarika Kandallu Ravichandscsacsilcjklakscnskalnckasncksancksanclkasnclksa", description: "SOmething", image: Image(systemName: "person.circle"), expense: nil, trailingView: .multiSelect(isSelected: true)))
 }
 

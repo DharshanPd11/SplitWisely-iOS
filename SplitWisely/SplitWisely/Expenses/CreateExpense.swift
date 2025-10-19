@@ -27,7 +27,8 @@ final class CreateExpenseViewModel: ObservableObject {
     @Published var addedDate: Date = Date()
     @Published var expenseDate: Date = Date()
     
-    
+    @Published var activeSheet: ActiveSheet? = nil
+    @Published var splitMode: PaymentSplitMode = .equal
     
     func selectGroupType(_ type: ExpenseType) {
         selectedExpenseType = type
@@ -36,19 +37,36 @@ final class CreateExpenseViewModel: ObservableObject {
     func buildGroup() -> ExpenseCardView {
         ExpenseCardView(id: 0, item: ExpenseCardView.DisplayItem(id: 0, title: name, description: "", expense: Amount(value: amount, currencyCode: currency.code), type: ExpenseInvovementType.borrowed, date: Date()))
     }
+    
+    func showSelectCurrency() {
+        activeSheet = .selectCurrency
+       }
+
+       func showAddParticipant() {
+           activeSheet = .addParticipant
+       }
+
+       func dismiss() {
+           activeSheet = nil
+       }
 }
 
 struct CreateExpenseView: View {
     
     @ObservedObject var viewModel: CreateExpenseViewModel
-    
-    @State var showCurrencies = false
-    @State var selectedCurrency: Currency? = AllCurrencies().currentCurrency
-    @Environment(\.dismiss) var dismiss
 
+    @State var selectedCurrency: Currency? = AllCurrencies().currentCurrency
+
+    @Environment(\.dismiss) var dismiss
+    @FocusState private var focusedField: Field?
+
+    enum Field {
+        case title, amount
+    }
+    
     var body: some View {
         NavigationStack{
-            VStack {
+            VStack(spacing: 5){
                 HStack {
                     ZStack{
                         Image(systemName: "list.bullet.rectangle.portrait")
@@ -57,7 +75,7 @@ struct CreateExpenseView: View {
                             .foregroundStyle(.background)
                             .frame(width: 35, height: 35)
                     }
-                    .frame(width: 50, height: 50)
+                    .frame(width: 45, height: 45)
                     .background{
                         RoundedRectangle(cornerRadius: 5)
                             .shadow(radius: 5, y: 5)
@@ -67,16 +85,18 @@ struct CreateExpenseView: View {
                         TextField("Enter Expense Name", text: .constant(""))
                             .font(.title2)
                             .padding(.top)
+                            .focused($focusedField, equals: .title)
                         Divider()
-                            .frame(height: 2)
+                            .frame(height: 1)
                             .overlay(.pink)
                     }
+                    .padding(.bottom)
                     .padding(.leading)
                     
                 }
                 HStack {
                     Button {
-                        showCurrencies = true
+                        viewModel.showSelectCurrency()
                     } label: {
                         ZStack{
                             Text(viewModel.currency.symbol)
@@ -87,7 +107,7 @@ struct CreateExpenseView: View {
                                 .foregroundStyle(.background)
                         }
                     }
-                    .frame(width: 50, height: 50)
+                    .frame(width: 45, height: 45)
                     .background{
                         RoundedRectangle(cornerRadius: 5)
                             .shadow(radius: 5, y: 5)
@@ -96,18 +116,48 @@ struct CreateExpenseView: View {
                         TextField("0.00", text: .constant(""))
                             .font(.title)
                             .fontWeight(.bold)
-                            .keyboardType(.numbersAndPunctuation)
+                            .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .amount)
                             .font(.title2)
                             .padding(.top)
                         Divider()
-                            .frame(height: 2)
+                            .frame(height: 1)
                             .overlay(.pink)
                     }
+                    .padding(.bottom)
                     .padding(.leading)
+
+                }
+                .frame(maxWidth: .infinity, maxHeight: 50)
+
+                HStack{
+                    Text("Paid by: ")
                     
+                    Button("John Doe", role: .confirm, action: {
+                        viewModel.showAddParticipant()
+                    })
+                    .buttonStyle(.glass)
+                    
+                    Text("and split ")
+
+                    Button("\(viewModel.splitMode.title)", role: .confirm, action: {
+                        viewModel.showAddParticipant()
+                    })
+
+                    .buttonStyle(.glass)
+                }
+                .padding(.top)
+                .font(.caption)
+            }
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now()) {
+                    focusedField = .title
                 }
             }
+            .padding()
+            .padding()
             .navigationTitle("Add Expense")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar{
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
@@ -115,10 +165,15 @@ struct CreateExpenseView: View {
                     }
                 }
             }
-            .padding()
-            .fullScreenCover(isPresented: $showCurrencies,
-                             onDismiss: didDismiss) {
-                AllCurrenciesView(selectedCurrency: $viewModel.currency)
+            
+            .fullScreenCover(item: $viewModel.activeSheet, onDismiss: didDismiss) { item in
+                switch item {
+                case .selectCurrency:
+                    AllCurrenciesView(selectedCurrency: $viewModel.currency)
+
+                case .addParticipant:
+                    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData.init().participants))
+                }
             }
         }
     }
@@ -128,6 +183,44 @@ struct CreateExpenseView: View {
     }
 }
 
+
+enum ActiveSheet: Identifiable {
+    case selectCurrency
+    case addParticipant
+
+    var id: String {
+        switch self {
+        case .selectCurrency: return "selectCurrency"
+        case .addParticipant: return "addParticipant"
+        }
+    }
+}
+
+enum PaymentSplitMode: Identifiable {
+    case equal
+    case custom
+    case percent
+    case shares
+    case adjustments
+    
+    var id: String{
+        switch self {
+        case .equal: return "equal"
+        case .custom: return "custom"
+        case .percent: return "percent"
+        case .shares: return "shares"
+        case .adjustments: return "adjustments"
+        }
+    }
+    
+    var title: String{
+        switch self {
+        case .equal: return "Equally"
+        default:
+            return "Unequally"
+        }
+    }
+}
 
 #Preview {
     CreateExpenseView(viewModel: CreateExpenseViewModel())
