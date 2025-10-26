@@ -57,7 +57,7 @@ struct AllExpensesView: View {
             }
                 .fullScreenCover(isPresented: $showAddExpenseSheet,
                                  onDismiss: didDismiss) {
-                                     CreateExpenseView(viewModel: CreateExpenseViewModel())
+                                     AddExpenseView(viewModel: AddExpenseViewModel())
                                  }
         )
         .toolbar {

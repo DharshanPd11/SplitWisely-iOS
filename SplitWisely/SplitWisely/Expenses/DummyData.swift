@@ -5,10 +5,53 @@
 //  Created by Priyadharshan Raja on 04/10/25.
 //
 
-import Foundation
+import SwiftUI
 
 public struct DummyData {
     
+    var participants : [ParticipantCardView.DisplayItem] = [
+        ParticipantCardView.DisplayItem(
+            id: 1,
+            name: "Alice Johnson",
+            description: "Team Lead",
+            image: Image(systemName: "person.circle.fill"),
+            expense: nil,
+            trailingView: .multiSelect(isSelected: true)
+        ),
+        ParticipantCardView.DisplayItem(
+            id: 2,
+            name: "Bob Kumar",
+            description: "iOS Developer",
+            image: Image(systemName: "person.circle.fill"),
+            expense: nil,
+            trailingView: .multiSelect(isSelected: false)
+        ),
+        ParticipantCardView.DisplayItem(
+            id: 3,
+            name: "Catherine Lee",
+            description: "Designer",
+            image: Image(systemName: "person.circle.fill"),
+            expense: nil,
+            trailingView: .singleSelect(isSelected: false)
+        ),
+        ParticipantCardView.DisplayItem(
+            id: 4,
+            name: "David Tanaka",
+            description: "QA Engineer",
+            image: Image(systemName: "person.circle.fill"),
+            expense: nil,
+            trailingView: .singleSelect(isSelected: true)
+        ),
+        ParticipantCardView.DisplayItem(
+            id: 5,
+            name: "Evelyn Smith",
+            description: "Intern",
+            image: Image(systemName: "person.circle"),
+            expense: nil,
+            trailingView: .none
+        )
+    ]
+
     var expenses : [ExpenseCardView.DisplayItem] = [
         ExpenseCardView.DisplayItem(
             id: 0,
