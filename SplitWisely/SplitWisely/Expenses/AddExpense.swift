@@ -17,7 +17,7 @@ enum ExpenseType {
     case none
 }
 
-final class CreateExpenseViewModel: ObservableObject {
+final class AddExpenseViewModel: ObservableObject {
     
     @Published var name: String = ""
     @Published var amount: Decimal = 0.00
@@ -27,7 +27,7 @@ final class CreateExpenseViewModel: ObservableObject {
     @Published var addedDate: Date = Date()
     @Published var expenseDate: Date = Date()
     
-    @Published var activeSheet: ActiveSheet? = nil
+    @Published var activeSheet: AddExpenseViewPresentables? = nil
     @Published var splitMode: PaymentSplitMode = .equal
     
     func selectGroupType(_ type: ExpenseType) {
@@ -40,20 +40,24 @@ final class CreateExpenseViewModel: ObservableObject {
     
     func showSelectCurrency() {
         activeSheet = .selectCurrency
-       }
+    }
 
-       func showAddParticipant() {
-           activeSheet = .addParticipant
-       }
+    func showAddParticipant() {
+        activeSheet = .addParticipant
+    }
+    
+    func showDatePickerView() {
+        activeSheet = .datePicker
+    }
 
-       func dismiss() {
-           activeSheet = nil
-       }
+    func dismiss() {
+        activeSheet = nil
+    }
 }
 
-struct CreateExpenseView: View {
+struct AddExpenseView: View {
     
-    @ObservedObject var viewModel: CreateExpenseViewModel
+    @ObservedObject var viewModel: AddExpenseViewModel
 
     @State var selectedCurrency: Currency? = AllCurrencies().currentCurrency
 
@@ -148,6 +152,8 @@ struct CreateExpenseView: View {
                 }
                 .padding(.top)
                 .font(.caption)
+                Spacer()
+                ExpenseAccessoryView(expenseAccessoryViewModel: viewModel)
             }
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now()) {
@@ -158,21 +164,19 @@ struct CreateExpenseView: View {
             .padding()
             .navigationTitle("Add Expense")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar{
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
+            .cancelToolBar {
+                dismiss()
             }
-            
             .fullScreenCover(item: $viewModel.activeSheet, onDismiss: didDismiss) { item in
                 switch item {
                 case .selectCurrency:
                     AllCurrenciesView(selectedCurrency: $viewModel.currency)
-
                 case .addParticipant:
                     AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData.init().participants))
+                case .datePicker:
+                    ExpenseDateView(expenseDate: $viewModel.expenseDate)
+                default:
+                    ExpenseDateView(expenseDate: $viewModel.expenseDate)
                 }
             }
         }
@@ -183,15 +187,94 @@ struct CreateExpenseView: View {
     }
 }
 
+struct ExpenseAccessoryView: View {
+    
+    @ObservedObject var expenseAccessoryViewModel: AddExpenseViewModel
+    
+    var body: some View {
+        HStack{
+            DateButton(expenseDate: $expenseAccessoryViewModel.expenseDate, toPresent: $expenseAccessoryViewModel.activeSheet)
+            GroupNameButton()
+            Spacer()
+            OpenCameraButton()
+            Spacer()
+            NotesButton()
+        }
+    }
+    
+    struct DateButton: View {
+        @Binding var expenseDate: Date
+        @Binding var toPresent: AddExpenseViewPresentables?
 
-enum ActiveSheet: Identifiable {
+        var body: some View {
+            HStack{
+                Button(action: {
+                    toPresent = .datePicker
+                }){
+                    HStack(alignment: .center){
+                        Image(systemName: "calendar")
+                        Text(expenseDate.formatted(.dateTime.month(.abbreviated)))
+                            .font(.headline)
+                        Text(expenseDate.formatted(.dateTime.day()))
+                    }
+                    .lineLimit(1)
+                }
+                .foregroundColor(.primary)
+
+            }
+        }
+    }
+    struct GroupNameButton: View {
+        var body: some View {
+            Button(action: {
+                //
+            }){
+                Image(systemName: "person.3.fill")
+                Text("Group NameNameName")
+                    .font(.default)
+                    .lineLimit(1)
+            }
+            .foregroundColor(.primary)
+        }
+    }
+    struct OpenCameraButton: View {
+        var body: some View {
+            Button(action: {
+                //
+            }) {
+                Image(systemName: "camera.fill")
+                    .foregroundColor(.primary)
+            }
+        }
+    }
+    struct NotesButton: View {
+        var body: some View {
+            Button(action: {
+                //
+            }) {
+                Image(systemName: "pencil.and.list.clipboard")
+                    .foregroundColor(.primary)
+            }
+        }
+    }
+}
+
+enum AddExpenseViewPresentables: Identifiable {
     case selectCurrency
     case addParticipant
+    case datePicker
+    case selectGroup
+    case attachPhotos
+    case notes
 
     var id: String {
         switch self {
         case .selectCurrency: return "selectCurrency"
         case .addParticipant: return "addParticipant"
+        case .datePicker: return "datePicker"
+        case .selectGroup: return "selectGroup"
+        case .attachPhotos: return "attachPhotos"
+        case .notes: return "notes"
         }
     }
 }
@@ -223,5 +306,5 @@ enum PaymentSplitMode: Identifiable {
 }
 
 #Preview {
-    CreateExpenseView(viewModel: CreateExpenseViewModel())
+    AddExpenseView(viewModel: AddExpenseViewModel())
 }
