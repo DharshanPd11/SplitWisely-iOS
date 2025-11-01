@@ -12,8 +12,35 @@ final class AllParticipantsViewModel: ObservableObject{
     
     @Published var participants : [ParticipantCardView.DisplayItem] = []
     @Published var type: ParticipantTrailingViewType = .singleSelect(isSelected: true)
+    
     init(participants: [ParticipantCardView.DisplayItem]) {
         self.participants = participants
+    }
+    
+    func getSelectedParticipants() -> [ParticipantCardView.DisplayItem] {
+        var selectedParticipants: [ParticipantCardView.DisplayItem] = []
+        for participant in participants {
+            switch participant.trailingView {
+            case .multiSelect(isSelected: true):
+                selectedParticipants.append(participant)
+            case .singleSelect(isSelected: true):
+                selectedParticipants.append(participant)
+            default:
+                break
+            }
+        }
+        return selectedParticipants
+    }
+    
+    func selectedParticipant(at index: Int) {
+        guard participants.indices.contains(index) else { return }
+        let current = participants[index]
+        switch current.trailingView {
+        case .multiSelect(isSelected: true):
+            participants[index].trailingView = .multiSelect(isSelected: false)
+        default:
+            participants[index].trailingView = .multiSelect(isSelected: true)
+        }
     }
 }
 
@@ -23,37 +50,29 @@ public struct AllParticipantsView: View {
     @Environment(\.dismiss) var dismiss
 
     public var body: some View {
-        NavigationSplitView{
+        NavigationStack{
             ScrollView(.vertical, showsIndicators: false) {
                 VStack{
-                    //                GroupDetailTitleView(groupName: $viewModel.title)
                     LazyVStack(spacing: 25) {
-                        ForEach(viewModel.participants) { participant in
-                            NavigationLink {
-                                // ExpenseDetailView()
-                            } label: {
-                                ParticipantCardView(id: participant.id, item: participant)
-                                    .padding(.horizontal)
-                                
-                            }.buttonStyle(.plain)
+                        ForEach(Array(viewModel.participants.enumerated()), id: \.element.id) { index, participant in
+                            ParticipantCardView(id: participant.id, item: participant)
+                                .padding(.horizontal)
+                                .onTapGesture {
+                                    viewModel.selectedParticipant(at: index)
+                                }
+                                .buttonStyle(.plain)
                         }
                     }
+                    .padding(.top)
                 }
-                .padding(.top)
             }
             .navigationTitle("Participants")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar{
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
+            .cancelDoneToolbar(onCancel: {dismiss()}, onDone: {
+                dismiss()
+            })
         }
-        detail: {
-            
-        }
+
     }
 }
 

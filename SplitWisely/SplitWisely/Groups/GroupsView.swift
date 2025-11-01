@@ -98,11 +98,14 @@ struct GroupsSelectionView: View {
                     dismiss()
                 }
             }
+            .listStyle(.automatic)
+            .navigationTitle("Select Group")
+            .navigationBarTitleDisplayMode(.inline)
             .cancelToolBar {
                 dismiss()
             }
         }
-        .listStyle(.automatic)
+
         .searchable(text: $searchText, prompt: "Search groups")
 
     }

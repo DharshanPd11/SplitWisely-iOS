@@ -27,9 +27,14 @@ final class AddExpenseViewModel: ObservableObject {
     @Published var selectedExpenseType: ExpenseType = .none
     @Published var addedDate: Date = Date()
     @Published var expenseDate: Date = Date()
-    
+    @Published var participants : [ParticipantCardView.DisplayItem] = DummyData.participants
+
     @Published var activeSheet: AddExpenseViewPresentables? = nil
     @Published var splitMode: PaymentSplitMode = .equal
+    
+    func addParticipant(_ participant: ParticipantCardView.DisplayItem) {
+        participants.append(participant)
+    }
     
     func selectGroupType(_ type: ExpenseType) {
         selectedExpenseType = type
@@ -72,6 +77,9 @@ struct AddExpenseView: View {
     var body: some View {
         NavigationStack{
             VStack(spacing: 5){
+                
+                ManageParticipantsView(addExpenseVM: viewModel)
+                
                 HStack {
                     ZStack{
                         Image(systemName: "list.bullet.rectangle.portrait")
@@ -190,81 +198,7 @@ struct AddExpenseView: View {
     }
 }
 
-struct ExpenseAccessoryView: View {
-    
-    @ObservedObject var expenseAccessoryViewModel: AddExpenseViewModel
-    
-    var body: some View {
-        HStack{
-            DateButton(expenseDate: $expenseAccessoryViewModel.expenseDate, toPresent: $expenseAccessoryViewModel.activeSheet)
-            Spacer()
-            GroupNameButton(group: $expenseAccessoryViewModel.group, toPresent: $expenseAccessoryViewModel.activeSheet)
-            Spacer()
-            OpenCameraButton()
-            Spacer()
-            NotesButton()
-        }
-    }
-    
-    struct DateButton: View {
-        @Binding var expenseDate: Date
-        @Binding var toPresent: AddExpenseViewPresentables?
 
-        var body: some View {
-            HStack{
-                Button(action: {
-                    toPresent = .datePicker
-                }){
-                    HStack(alignment: .center){
-                        Image(systemName: "calendar")
-                        Text(expenseDate.formatted(.dateTime.month(.abbreviated)))
-                            .font(.headline)
-                        Text(expenseDate.formatted(.dateTime.day()))
-                    }
-                    .lineLimit(1)
-                }
-                .foregroundColor(.primary)
-
-            }
-        }
-    }
-    struct GroupNameButton: View {
-        @Binding var group: GroupDisplayItem
-        @Binding var toPresent: AddExpenseViewPresentables?
-        
-        var body: some View {
-            Button(action: {
-                toPresent = .selectGroup
-            }){
-                Image(systemName: "person.3.fill")
-                Text(group.name)
-                    .font(.default)
-                    .lineLimit(1)
-            }
-            .foregroundColor(.primary)
-        }
-    }
-    struct OpenCameraButton: View {
-        var body: some View {
-            Button(action: {
-                //
-            }) {
-                Image(systemName: "camera.fill")
-                    .foregroundColor(.primary)
-            }
-        }
-    }
-    struct NotesButton: View {
-        var body: some View {
-            Button(action: {
-                //
-            }) {
-                Image(systemName: "pencil.and.list.clipboard")
-                    .foregroundColor(.primary)
-            }
-        }
-    }
-}
 
 enum AddExpenseViewPresentables: Identifiable {
     case selectCurrency

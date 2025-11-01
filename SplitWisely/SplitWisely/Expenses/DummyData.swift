@@ -32,7 +32,7 @@ public struct DummyData {
             description: "Designer",
             image: Image(systemName: "person.circle.fill"),
             expense: nil,
-            trailingView: .singleSelect(isSelected: false)
+            trailingView: .multiSelect(isSelected: false)
         ),
         ParticipantCardView.DisplayItem(
             id: 4,
@@ -40,7 +40,7 @@ public struct DummyData {
             description: "QA Engineer",
             image: Image(systemName: "person.circle.fill"),
             expense: nil,
-            trailingView: .singleSelect(isSelected: true)
+            trailingView: .multiSelect(isSelected: false)
         ),
         ParticipantCardView.DisplayItem(
             id: 5,
@@ -48,7 +48,7 @@ public struct DummyData {
             description: "Intern",
             image: Image(systemName: "person.circle"),
             expense: nil,
-            trailingView: .none
+            trailingView: .multiSelect(isSelected: false)
         )
     ]
 
