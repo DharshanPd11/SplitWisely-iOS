@@ -58,5 +58,5 @@ public struct AllParticipantsView: View {
 }
 
 #Preview {
-    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData().participants))
+    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData.participants))
 }

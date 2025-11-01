@@ -80,6 +80,6 @@ struct AllExpensesView: View {
 
 
 #Preview {
-    AllExpensesView(viewModel: ExpenseViewModel(title: "group.name", expenses: DummyData().getExpenses()))
+    AllExpensesView(viewModel: ExpenseViewModel(group: GroupDisplayItem(id: 10, icon: "", name: "name", image: Image(systemName: "calender"), status: .noExpense), expenses: DummyData().getExpenses()))
 }
 

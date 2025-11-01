@@ -19,6 +19,7 @@ enum ExpenseType {
 
 final class AddExpenseViewModel: ObservableObject {
     
+    @Published var group: GroupDisplayItem = GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense)
     @Published var name: String = ""
     @Published var amount: Decimal = 0.00
     @Published var currency: Currency = AllCurrencies().currentCurrency
@@ -34,7 +35,7 @@ final class AddExpenseViewModel: ObservableObject {
         selectedExpenseType = type
     }
     
-    func buildGroup() -> ExpenseCardView {
+    func buildExpense() -> ExpenseCardView {
         ExpenseCardView(id: 0, item: ExpenseCardView.DisplayItem(id: 0, title: name, description: "", expense: Amount(value: amount, currencyCode: currency.code), type: ExpenseInvovementType.borrowed, date: Date()))
     }
     
@@ -172,9 +173,11 @@ struct AddExpenseView: View {
                 case .selectCurrency:
                     AllCurrenciesView(selectedCurrency: $viewModel.currency)
                 case .addParticipant:
-                    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData.init().participants))
+                    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData.participants))
                 case .datePicker:
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
+                case .selectGroup:
+                    GroupsSelectionView(selectedGroup: $viewModel.group, viewModel: GroupsViewModel())
                 default:
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
                 }
@@ -194,7 +197,8 @@ struct ExpenseAccessoryView: View {
     var body: some View {
         HStack{
             DateButton(expenseDate: $expenseAccessoryViewModel.expenseDate, toPresent: $expenseAccessoryViewModel.activeSheet)
-            GroupNameButton()
+            Spacer()
+            GroupNameButton(group: $expenseAccessoryViewModel.group, toPresent: $expenseAccessoryViewModel.activeSheet)
             Spacer()
             OpenCameraButton()
             Spacer()
@@ -225,12 +229,15 @@ struct ExpenseAccessoryView: View {
         }
     }
     struct GroupNameButton: View {
+        @Binding var group: GroupDisplayItem
+        @Binding var toPresent: AddExpenseViewPresentables?
+        
         var body: some View {
             Button(action: {
-                //
+                toPresent = .selectGroup
             }){
                 Image(systemName: "person.3.fill")
-                Text("Group NameNameName")
+                Text(group.name)
                     .font(.default)
                     .lineLimit(1)
             }
@@ -306,5 +313,6 @@ enum PaymentSplitMode: Identifiable {
 }
 
 #Preview {
+//    ExpenseFormView()
     AddExpenseView(viewModel: AddExpenseViewModel())
 }
