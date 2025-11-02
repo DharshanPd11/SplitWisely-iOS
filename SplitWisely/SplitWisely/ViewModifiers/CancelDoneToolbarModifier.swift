@@ -18,8 +18,10 @@ struct CancelDoneToolbarModifier: ViewModifier {
                     Button("Cancel", action: onCancel)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done", action: onDone)
-                        .bold()
+                    Button(action: onDone) {
+                        Image(systemName: "checkmark")
+                    }
+                    .buttonStyle(.glassProminent)
                 }
             }
     }
@@ -45,8 +47,10 @@ struct DoneViewModifier: ViewModifier {
         content
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done", action: onDone)
-                        .bold()
+                    Button(action: onDone) {
+                        Image(systemName: "checkmark")
+                    }
+                    .buttonStyle(.glassProminent)
                 }
             }
     }

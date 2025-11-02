@@ -27,6 +27,11 @@ final class AddExpenseViewModel: ObservableObject {
     @Published var selectedExpenseType: ExpenseType = .none
     @Published var addedDate: Date = Date()
     @Published var expenseDate: Date = Date()
+    
+    @Published var selectPayerVM = PayerViewModel()
+    @Published var paidBy : ParticipantCardView.DisplayItem = DummyData.participants[0]
+    
+    @Published var participantsVM = AllParticipantsViewModel(participants: DummyData.participants)
     @Published var participants : [ParticipantCardView.DisplayItem] = DummyData.participants
 
     @Published var activeSheet: AddExpenseViewPresentables? = nil
@@ -48,6 +53,10 @@ final class AddExpenseViewModel: ObservableObject {
         activeSheet = .selectCurrency
     }
 
+    func showSelectPayerSheet(){
+        activeSheet = .payer
+    }
+    
     func showAddParticipant() {
         activeSheet = .addParticipant
     }
@@ -65,7 +74,8 @@ struct AddExpenseView: View {
     
     @ObservedObject var viewModel: AddExpenseViewModel
 
-    @State var selectedCurrency: Currency? = AllCurrencies().currentCurrency
+    @State var didFinishPickingParticipants: Bool = false
+    @State var didFinishPickingPayer: Bool = false
 
     @Environment(\.dismiss) var dismiss
     @FocusState private var focusedField: Field?
@@ -146,8 +156,8 @@ struct AddExpenseView: View {
                 HStack{
                     Text("Paid by: ")
                     
-                    Button("John Doe", role: .confirm, action: {
-                        viewModel.showAddParticipant()
+                    Button(viewModel.paidBy.name, role: .confirm, action: {
+                        viewModel.showSelectPayerSheet()
                     })
                     .buttonStyle(.glass)
                     
@@ -176,20 +186,29 @@ struct AddExpenseView: View {
             .cancelToolBar {
                 dismiss()
             }
+            
             .fullScreenCover(item: $viewModel.activeSheet, onDismiss: didDismiss) { item in
                 switch item {
                 case .selectCurrency:
                     AllCurrenciesView(selectedCurrency: $viewModel.currency)
                 case .addParticipant:
-                    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData.participants))
+                    AllParticipantsView(viewModel: viewModel.participantsVM, didFinishPickingParticipants: $didFinishPickingParticipants)
                 case .datePicker:
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
                 case .selectGroup:
                     GroupsSelectionView(selectedGroup: $viewModel.group, viewModel: GroupsViewModel())
+                case.payer:
+                    SelectPayerView(viewModel: viewModel.selectPayerVM, didFinishpickingPayer: $didFinishPickingPayer)
                 default:
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
                 }
             }
+            .onChange(of: didFinishPickingParticipants, {
+                viewModel.participants = viewModel.participantsVM.getSelectedParticipants()
+            })
+            .onChange(of: didFinishPickingPayer, {
+                viewModel.paidBy = viewModel.selectPayerVM.selectedPayer ?? DummyData.participants[0]
+            })
         }
     }
     
@@ -206,6 +225,7 @@ enum AddExpenseViewPresentables: Identifiable {
     case datePicker
     case selectGroup
     case attachPhotos
+    case payer
     case notes
 
     var id: String {
@@ -216,6 +236,7 @@ enum AddExpenseViewPresentables: Identifiable {
         case .selectGroup: return "selectGroup"
         case .attachPhotos: return "attachPhotos"
         case .notes: return "notes"
+        case .payer: return "Payer"
         }
     }
 }

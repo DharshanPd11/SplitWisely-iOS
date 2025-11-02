@@ -19,6 +19,7 @@ public struct ParticipantCardView: View {
         var image: Image?
         var expense: Amount?
         var trailingView: ParticipantTrailingViewType
+        var type: ParticipantType? = .individual
     }
 
     public var body: some View {
@@ -50,7 +51,7 @@ public struct ParticipantCardView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
+                .fill(Color(.clear))
         )
     }
 }
@@ -73,6 +74,12 @@ enum ParticipantTrailingViewType {
                 .foregroundColor(.green)
         }
     }
+}
+
+enum ParticipantType: String, CaseIterable {
+    case group = "Group"
+    case individual = "Individual"
+    case newRegistered = "New Registered"
 }
 
 #Preview {

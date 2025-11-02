@@ -16,7 +16,8 @@ public struct DummyData {
             description: "Team Lead",
             image: Image(systemName: "person.circle.fill"),
             expense: nil,
-            trailingView: .multiSelect(isSelected: true)
+            trailingView: .multiSelect(isSelected: true),
+            type: .individual
         ),
         ParticipantCardView.DisplayItem(
             id: 2,
@@ -215,7 +216,7 @@ public struct DummyData {
         )
     ]
     
-    static var groups: [GroupDisplayItem] = [ GroupDisplayItem(id: 0, icon: "", name: "Munnar", status: .settled), GroupDisplayItem(id: 1, icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending), GroupDisplayItem(id: 2, icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming), GroupDisplayItem(id: 4, icon: "", name: "Andaman and Nicobar", status: .noExpense), GroupDisplayItem(id: 3, icon: "", name: "Munnar", status: .settled), GroupDisplayItem(id: 5, icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending), GroupDisplayItem(id: 6, icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming), GroupDisplayItem(id: 7, icon: "", name: "Andaman and Nicobar", status: .noExpense)]
+    static var groups: [GroupDisplayItem] = [ GroupDisplayItem(id: 10, icon: "", name: "Munnar", status: .settled), GroupDisplayItem(id: 11, icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending), GroupDisplayItem(id: 12, icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming), GroupDisplayItem(id: 14, icon: "", name: "Andaman and Nicobar", status: .noExpense), GroupDisplayItem(id: 13, icon: "", name: "Munnar", status: .settled), GroupDisplayItem(id: 15, icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending), GroupDisplayItem(id: 16, icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming), GroupDisplayItem(id: 17, icon: "", name: "Andaman and Nicobar", status: .noExpense)]
     
     func getExpenses() -> [ExpenseCardView.DisplayItem] {
         return expenses
