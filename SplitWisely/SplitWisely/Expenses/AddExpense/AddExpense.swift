@@ -45,8 +45,9 @@ final class AddExpenseViewModel: ObservableObject {
         selectedExpenseType = type
     }
     
-    func buildExpense() -> ExpenseCardView {
-        ExpenseCardView(id: 0, item: ExpenseCardView.DisplayItem(id: 0, title: name, description: "", expense: Amount(value: amount, currencyCode: currency.code), type: ExpenseInvovementType.borrowed, date: Date()))
+    func addExpense() -> ExpenseCardView.DisplayItem{
+       let newExpense = ExpenseCardView.DisplayItem(id: DummyData.expenses.count + 1, title: name, description: "", expense: Amount(value: amount, currencyCode: currency.code), type: ExpenseInvovementType.borrowed, date: Date())
+        return newExpense
     }
     
     func showSelectCurrency() {
@@ -74,9 +75,12 @@ struct AddExpenseView: View {
     
     @ObservedObject var viewModel: AddExpenseViewModel
 
+    @State var name: String = ""
+    @State var amount: String = ""
     @State var didFinishPickingParticipants: Bool = false
     @State var didFinishPickingPayer: Bool = false
 
+    var onSave: (ExpenseCardView.DisplayItem) -> Void
     @Environment(\.dismiss) var dismiss
     @FocusState private var focusedField: Field?
 
@@ -105,7 +109,7 @@ struct AddExpenseView: View {
                         
                     }
                     VStack{
-                        TextField("Enter Expense Name", text: .constant(""))
+                        TextField("Enter Expense Name", text: $name)
                             .font(.title2)
                             .padding(.top)
                             .focused($focusedField, equals: .title)
@@ -136,7 +140,7 @@ struct AddExpenseView: View {
                             .shadow(radius: 5, y: 5)
                     }
                     VStack{
-                        TextField("0.00", text: .constant(""))
+                        TextField("0.00", text: $amount)
                             .font(.title)
                             .fontWeight(.bold)
                             .keyboardType(.decimalPad)
@@ -149,10 +153,10 @@ struct AddExpenseView: View {
                     }
                     .padding(.bottom)
                     .padding(.leading)
-
+                    
                 }
                 .frame(maxWidth: .infinity, maxHeight: 50)
-
+                
                 HStack{
                     Text("Paid by: ")
                     
@@ -162,30 +166,38 @@ struct AddExpenseView: View {
                     .buttonStyle(.glass)
                     
                     Text("and split ")
-
+                    
                     Button("\(viewModel.splitMode.title)", role: .confirm, action: {
                         viewModel.showAddParticipant()
                     })
-
+                    
                     .buttonStyle(.glass)
                 }
                 .padding(.top)
                 .font(.caption)
+                
+                if let _ = viewModel.selectedImage {
+                    HStack{
+                        Image(systemName: "paperclip")
+                        Text("Image Attached")
+                    }
+                    .padding()
+                }
                 Spacer()
                 ExpenseAccessoryView(expenseAccessoryViewModel: viewModel)
             }
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now()) {
-                    focusedField = .title
-                }
+                focusedField = .title
             }
             .padding()
             .padding()
             .navigationTitle("Add Expense")
             .navigationBarTitleDisplayMode(.inline)
-            .cancelToolBar {
+            .cancelDoneToolbar(onCancel: {dismiss()}, onDone: {
+                let newExpense = viewModel.addExpense()
+                onSave(newExpense)
                 dismiss()
-            }
+            })
             
             .fullScreenCover(item: $viewModel.activeSheet, onDismiss: didDismiss) { item in
                 switch item {
@@ -197,8 +209,10 @@ struct AddExpenseView: View {
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
                 case .selectGroup:
                     GroupsSelectionView(selectedGroup: $viewModel.group, viewModel: GroupsViewModel())
-                case.payer:
+                case .payer:
                     SelectPayerView(viewModel: viewModel.selectPayerVM, didFinishpickingPayer: $didFinishPickingPayer)
+                case .camera:
+                    PhotoCaptureView(viewModel: viewModel)
                 default:
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
                 }
@@ -208,6 +222,14 @@ struct AddExpenseView: View {
             })
             .onChange(of: didFinishPickingPayer, {
                 viewModel.paidBy = viewModel.selectPayerVM.selectedPayer ?? DummyData.participants[0]
+            })
+            .onChange(of: name, {
+                viewModel.name = name
+            })
+            .onChange(of: amount, {
+                if let decimalValue = Decimal(string: amount) {
+                    viewModel.amount = decimalValue
+                }
             })
         }
     }
@@ -226,6 +248,7 @@ enum AddExpenseViewPresentables: Identifiable {
     case selectGroup
     case attachPhotos
     case payer
+    case camera
     case notes
 
     var id: String {
@@ -237,6 +260,7 @@ enum AddExpenseViewPresentables: Identifiable {
         case .attachPhotos: return "attachPhotos"
         case .notes: return "notes"
         case .payer: return "Payer"
+        case .camera: return "camera"
         }
     }
 }
@@ -269,5 +293,7 @@ enum PaymentSplitMode: Identifiable {
 
 #Preview {
 //    ExpenseFormView()
-    AddExpenseView(viewModel: AddExpenseViewModel())
+    AddExpenseView(viewModel: AddExpenseViewModel(), onSave: {_ in 
+        
+    })
 }

@@ -62,5 +62,5 @@ struct ParticipantsCollectionView: View {
 }
 
 #Preview {
-    AddExpenseView(viewModel: AddExpenseViewModel())
+//    AddExpenseView(viewModel: AddExpenseViewModel())
 }

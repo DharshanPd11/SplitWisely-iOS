@@ -27,6 +27,7 @@ final class PayerViewModel: ObservableObject {
         guard let index = participants.firstIndex(where: { $0.id == id }) else { return }
         
         let current = participants[index]
+        selectedPayer = current
         
         switch current.trailingView {
         case .multiSelect(isSelected: true):

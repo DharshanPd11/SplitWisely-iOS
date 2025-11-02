@@ -53,7 +53,7 @@ public struct DummyData {
         )
     ]
 
-    var expenses : [ExpenseCardView.DisplayItem] = [
+    static var expenses : [ExpenseCardView.DisplayItem] = [
         ExpenseCardView.DisplayItem(
             id: 0,
             title: "Lunch Bill",
@@ -219,7 +219,7 @@ public struct DummyData {
     static var groups: [GroupDisplayItem] = [ GroupDisplayItem(id: 10, icon: "", name: "Munnar", status: .settled), GroupDisplayItem(id: 11, icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending), GroupDisplayItem(id: 12, icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming), GroupDisplayItem(id: 14, icon: "", name: "Andaman and Nicobar", status: .noExpense), GroupDisplayItem(id: 13, icon: "", name: "Munnar", status: .settled), GroupDisplayItem(id: 15, icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending), GroupDisplayItem(id: 16, icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming), GroupDisplayItem(id: 17, icon: "", name: "Andaman and Nicobar", status: .noExpense)]
     
     func getExpenses() -> [ExpenseCardView.DisplayItem] {
-        return expenses
+        return DummyData.expenses
     }
 }
 

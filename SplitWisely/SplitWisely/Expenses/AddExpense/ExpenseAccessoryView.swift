@@ -17,7 +17,7 @@ struct ExpenseAccessoryView: View {
             Spacer()
             GroupNameButton(group: $expenseAccessoryViewModel.group, toPresent: $expenseAccessoryViewModel.activeSheet)
             Spacer()
-            OpenCameraButton()
+            OpenCameraButton(toPresent: $expenseAccessoryViewModel.activeSheet)
             Spacer()
             NotesButton()
         }
@@ -62,9 +62,11 @@ struct ExpenseAccessoryView: View {
         }
     }
     struct OpenCameraButton: View {
+        @Binding var toPresent: AddExpenseViewPresentables?
+
         var body: some View {
             Button(action: {
-                //
+                toPresent = .camera
             }) {
                 Image(systemName: "camera.fill")
                     .foregroundColor(.primary)
