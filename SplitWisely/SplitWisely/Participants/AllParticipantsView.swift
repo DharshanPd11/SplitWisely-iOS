@@ -12,51 +12,94 @@ final class AllParticipantsViewModel: ObservableObject{
     
     @Published var participants : [ParticipantCardView.DisplayItem] = []
     @Published var type: ParticipantTrailingViewType = .singleSelect(isSelected: true)
+    @Published var searchText: String = ""
+    let availableGroups = GroupsViewModel().groups
+    
     init(participants: [ParticipantCardView.DisplayItem]) {
         self.participants = participants
+        self.convertGroupsIntoParticipantObject()
+    }
+    
+    var groupedParticipants: [ParticipantType: [ParticipantCardView.DisplayItem]] {
+        let filtered = searchText.isEmpty ? participants : participants.filter({ $0.name.lowercased().localizedCaseInsensitiveContains(searchText.lowercased())})
+       return Dictionary(grouping: filtered, by: { $0.type ?? .individual })
+    }
+    
+    private func convertGroupsIntoParticipantObject(){
+        for group in availableGroups {
+            let participantItem : ParticipantCardView.DisplayItem = .init(id: group.id, name: group.name, trailingView: .multiSelect(isSelected: false), type: .group)
+            participants.append(participantItem)
+        }
+    }
+    
+    func getSelectedParticipants() -> [ParticipantCardView.DisplayItem] {
+        var selectedParticipants: [ParticipantCardView.DisplayItem] = []
+        for participant in participants {
+            switch participant.trailingView {
+            case .multiSelect(isSelected: true):
+                selectedParticipants.append(participant)
+            case .singleSelect(isSelected: true):
+                selectedParticipants.append(participant)
+            default:
+                break
+            }
+        }
+        return selectedParticipants
+    }
+    
+    func selectedParticipant(with id: Int) {
+        guard let index = participants.firstIndex(where: { $0.id == id }) else { return }
+        
+        let current = participants[index]
+        
+        switch current.trailingView {
+        case .multiSelect(isSelected: true):
+            participants[index].trailingView = .multiSelect(isSelected: false)
+        default:
+            participants[index].trailingView = .multiSelect(isSelected: true)
+        }
     }
 }
 
 public struct AllParticipantsView: View {
     
     @ObservedObject var viewModel: AllParticipantsViewModel
+    @Binding var didFinishPickingParticipants: Bool
     @Environment(\.dismiss) var dismiss
 
     public var body: some View {
-        NavigationSplitView{
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack{
-                    //                GroupDetailTitleView(groupName: $viewModel.title)
-                    LazyVStack(spacing: 25) {
-                        ForEach(viewModel.participants) { participant in
-                            NavigationLink {
-                                // ExpenseDetailView()
-                            } label: {
+        NavigationStack {
+            List {
+                ForEach(ParticipantType.allCases, id: \.self) { type in
+                    if let participants = viewModel.groupedParticipants[type], !participants.isEmpty {
+                        Section(header: Text(type.rawValue)) {
+                            ForEach(participants) { participant in
                                 ParticipantCardView(id: participant.id, item: participant)
                                     .padding(.horizontal)
-                                
-                            }.buttonStyle(.plain)
+                                    .onTapGesture {
+                                        viewModel.selectedParticipant(with: participant.id)
+                                    }
+                            }
                         }
                     }
                 }
-                .padding(.top)
             }
+            .listStyle(.insetGrouped)
             .navigationTitle("Participants")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar{
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-        detail: {
-            
+            .cancelDoneToolbar(onCancel: { dismiss() },
+                               onDone: {
+                didFinishPickingParticipants = true
+                dismiss()
+            })
+            .searchable(text: $viewModel.searchText, prompt: "Search")
+     
         }
     }
+
 }
 
 #Preview {
-    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData().participants))
+    @Previewable @State var didFinishPickingParticipants = false
+    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData.participants), didFinishPickingParticipants: $didFinishPickingParticipants )
 }

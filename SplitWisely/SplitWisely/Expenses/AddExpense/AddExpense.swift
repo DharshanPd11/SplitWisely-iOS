@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import FoundationModels
 
 enum ExpenseType {
     case medics
@@ -19,6 +20,7 @@ enum ExpenseType {
 
 final class AddExpenseViewModel: ObservableObject {
     
+    @Published var group: GroupDisplayItem = GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense)
     @Published var name: String = ""
     @Published var amount: Decimal = 0.00
     @Published var currency: Currency = AllCurrencies().currentCurrency
@@ -27,21 +29,38 @@ final class AddExpenseViewModel: ObservableObject {
     @Published var addedDate: Date = Date()
     @Published var expenseDate: Date = Date()
     
+    @Published var selectPayerVM = PayerViewModel()
+    @Published var paidBy : ParticipantCardView.DisplayItem = DummyData.participants[0]
+    
+    @Published var participantsVM = AllParticipantsViewModel(participants: DummyData.participants)
+    @Published var participants : [ParticipantCardView.DisplayItem] = DummyData.participants
+
     @Published var activeSheet: AddExpenseViewPresentables? = nil
     @Published var splitMode: PaymentSplitMode = .equal
+    
+    private let expenseGenerator = ExpenseExtractor()
+    
+    func addParticipant(_ participant: ParticipantCardView.DisplayItem) {
+        participants.append(participant)
+    }
     
     func selectGroupType(_ type: ExpenseType) {
         selectedExpenseType = type
     }
     
-    func buildGroup() -> ExpenseCardView {
-        ExpenseCardView(id: 0, item: ExpenseCardView.DisplayItem(id: 0, title: name, description: "", expense: Amount(value: amount, currencyCode: currency.code), type: ExpenseInvovementType.borrowed, date: Date()))
+    func addExpense() -> ExpenseCardView.DisplayItem{
+       let newExpense = ExpenseCardView.DisplayItem(id: DummyData.expenses.count + 1, title: name, description: "", expense: Amount(value: amount, currencyCode: currency.code), type: ExpenseInvovementType.borrowed, date: Date())
+        return newExpense
     }
     
     func showSelectCurrency() {
         activeSheet = .selectCurrency
     }
 
+    func showSelectPayerSheet(){
+        activeSheet = .payer
+    }
+    
     func showAddParticipant() {
         activeSheet = .addParticipant
     }
@@ -53,14 +72,45 @@ final class AddExpenseViewModel: ObservableObject {
     func dismiss() {
         activeSheet = nil
     }
+    
+    func selected(image: UIImage){
+        selectedImage = image
+        if expenseGenerator.isDeviceAICompatible(){
+            let textRecognizer = TextRecognizer()
+            textRecognizer.extractText(from: image) { extractedText in
+                Task { @MainActor in
+                    await self.process(text: extractedText)
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    private func process(text: String) async {
+        do {
+            let exp = try await expenseGenerator.extractExpense(from: text)
+            guard let exp else { return }
+
+            name = exp.title
+//            currency = exp.currency
+            amount = exp.amount
+        } catch {
+            print("❌ Failed to extract expense:", error)
+        }
+    }
+
 }
 
 struct AddExpenseView: View {
     
     @ObservedObject var viewModel: AddExpenseViewModel
 
-    @State var selectedCurrency: Currency? = AllCurrencies().currentCurrency
+    @State var name: String = ""
+    @State var amount: String = ""
+    @State var didFinishPickingParticipants: Bool = false
+    @State var didFinishPickingPayer: Bool = false
 
+    var onSave: (ExpenseCardView.DisplayItem) -> Void
     @Environment(\.dismiss) var dismiss
     @FocusState private var focusedField: Field?
 
@@ -71,6 +121,9 @@ struct AddExpenseView: View {
     var body: some View {
         NavigationStack{
             VStack(spacing: 5){
+                
+                ManageParticipantsView(addExpenseVM: viewModel)
+                
                 HStack {
                     ZStack{
                         Image(systemName: "list.bullet.rectangle.portrait")
@@ -86,7 +139,7 @@ struct AddExpenseView: View {
                         
                     }
                     VStack{
-                        TextField("Enter Expense Name", text: .constant(""))
+                        TextField("Enter Expense Name", text: $name)
                             .font(.title2)
                             .padding(.top)
                             .focused($focusedField, equals: .title)
@@ -117,7 +170,7 @@ struct AddExpenseView: View {
                             .shadow(radius: 5, y: 5)
                     }
                     VStack{
-                        TextField("0.00", text: .constant(""))
+                        TextField("0.00", text: $amount)
                             .font(.title)
                             .fontWeight(.bold)
                             .keyboardType(.decimalPad)
@@ -130,55 +183,84 @@ struct AddExpenseView: View {
                     }
                     .padding(.bottom)
                     .padding(.leading)
-
+                    
                 }
                 .frame(maxWidth: .infinity, maxHeight: 50)
-
+                
                 HStack{
                     Text("Paid by: ")
                     
-                    Button("John Doe", role: .confirm, action: {
-                        viewModel.showAddParticipant()
+                    Button(viewModel.paidBy.name, role: .confirm, action: {
+                        viewModel.showSelectPayerSheet()
                     })
                     .buttonStyle(.glass)
                     
                     Text("and split ")
-
+                    
                     Button("\(viewModel.splitMode.title)", role: .confirm, action: {
                         viewModel.showAddParticipant()
                     })
-
+                    
                     .buttonStyle(.glass)
                 }
                 .padding(.top)
                 .font(.caption)
+                
+                if let _ = viewModel.selectedImage {
+                    HStack{
+                        Image(systemName: "paperclip")
+                        Text("Image Attached")
+                    }
+                    .padding()
+                }
                 Spacer()
                 ExpenseAccessoryView(expenseAccessoryViewModel: viewModel)
             }
             .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now()) {
-                    focusedField = .title
-                }
+                focusedField = .title
             }
             .padding()
             .padding()
             .navigationTitle("Add Expense")
             .navigationBarTitleDisplayMode(.inline)
-            .cancelToolBar {
+            .cancelDoneToolbar(onCancel: {dismiss()}, onDone: {
+                let newExpense = viewModel.addExpense()
+                onSave(newExpense)
                 dismiss()
-            }
+            })
+            
             .fullScreenCover(item: $viewModel.activeSheet, onDismiss: didDismiss) { item in
                 switch item {
                 case .selectCurrency:
                     AllCurrenciesView(selectedCurrency: $viewModel.currency)
                 case .addParticipant:
-                    AllParticipantsView(viewModel: AllParticipantsViewModel(participants: DummyData.init().participants))
+                    AllParticipantsView(viewModel: viewModel.participantsVM, didFinishPickingParticipants: $didFinishPickingParticipants)
                 case .datePicker:
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
+                case .selectGroup:
+                    GroupsSelectionView(selectedGroup: $viewModel.group, viewModel: GroupsViewModel())
+                case .payer:
+                    SelectPayerView(viewModel: viewModel.selectPayerVM, didFinishpickingPayer: $didFinishPickingPayer)
+                case .camera:
+                    PhotoCaptureView(viewModel: viewModel)
                 default:
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
                 }
             }
+            .onChange(of: didFinishPickingParticipants, {
+                viewModel.participants = viewModel.participantsVM.getSelectedParticipants()
+            })
+            .onChange(of: didFinishPickingPayer, {
+                viewModel.paidBy = viewModel.selectPayerVM.selectedPayer ?? DummyData.participants[0]
+            })
+            .onChange(of: name, {
+                viewModel.name = name
+            })
+            .onChange(of: amount, {
+                if let decimalValue = Decimal(string: amount) {
+                    viewModel.amount = decimalValue
+                }
+            })
         }
     }
     
@@ -187,77 +269,7 @@ struct AddExpenseView: View {
     }
 }
 
-struct ExpenseAccessoryView: View {
-    
-    @ObservedObject var expenseAccessoryViewModel: AddExpenseViewModel
-    
-    var body: some View {
-        HStack{
-            DateButton(expenseDate: $expenseAccessoryViewModel.expenseDate, toPresent: $expenseAccessoryViewModel.activeSheet)
-            GroupNameButton()
-            Spacer()
-            OpenCameraButton()
-            Spacer()
-            NotesButton()
-        }
-    }
-    
-    struct DateButton: View {
-        @Binding var expenseDate: Date
-        @Binding var toPresent: AddExpenseViewPresentables?
 
-        var body: some View {
-            HStack{
-                Button(action: {
-                    toPresent = .datePicker
-                }){
-                    HStack(alignment: .center){
-                        Image(systemName: "calendar")
-                        Text(expenseDate.formatted(.dateTime.month(.abbreviated)))
-                            .font(.headline)
-                        Text(expenseDate.formatted(.dateTime.day()))
-                    }
-                    .lineLimit(1)
-                }
-                .foregroundColor(.primary)
-
-            }
-        }
-    }
-    struct GroupNameButton: View {
-        var body: some View {
-            Button(action: {
-                //
-            }){
-                Image(systemName: "person.3.fill")
-                Text("Group NameNameName")
-                    .font(.default)
-                    .lineLimit(1)
-            }
-            .foregroundColor(.primary)
-        }
-    }
-    struct OpenCameraButton: View {
-        var body: some View {
-            Button(action: {
-                //
-            }) {
-                Image(systemName: "camera.fill")
-                    .foregroundColor(.primary)
-            }
-        }
-    }
-    struct NotesButton: View {
-        var body: some View {
-            Button(action: {
-                //
-            }) {
-                Image(systemName: "pencil.and.list.clipboard")
-                    .foregroundColor(.primary)
-            }
-        }
-    }
-}
 
 enum AddExpenseViewPresentables: Identifiable {
     case selectCurrency
@@ -265,6 +277,8 @@ enum AddExpenseViewPresentables: Identifiable {
     case datePicker
     case selectGroup
     case attachPhotos
+    case payer
+    case camera
     case notes
 
     var id: String {
@@ -275,6 +289,8 @@ enum AddExpenseViewPresentables: Identifiable {
         case .selectGroup: return "selectGroup"
         case .attachPhotos: return "attachPhotos"
         case .notes: return "notes"
+        case .payer: return "Payer"
+        case .camera: return "camera"
         }
     }
 }
@@ -306,5 +322,8 @@ enum PaymentSplitMode: Identifiable {
 }
 
 #Preview {
-    AddExpenseView(viewModel: AddExpenseViewModel())
+//    ExpenseFormView()
+    AddExpenseView(viewModel: AddExpenseViewModel(), onSave: {_ in 
+        
+    })
 }

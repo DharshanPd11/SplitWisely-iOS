@@ -10,15 +10,13 @@ import SwiftUI
 struct GroupsView: View {
     @State private var createGroupIsPresenting = false
     @ObservedObject private var viewModel: GroupsViewModel = GroupsViewModel()
-    
-    var rows: [GroupDisplayCardView] = []
-    
+        
     var body: some View {
         
         NavigationSplitView {
             List(viewModel.groups) { group in
                 NavigationLink {
-                    AllExpensesView(viewModel: ExpenseViewModel(title: group.name, expenses: DummyData().getExpenses()))
+                    AllExpensesView(viewModel: ExpenseViewModel(group: group, expenses: DummyData().getExpenses()))
                 } label: {
                     GroupDisplayCardView(id: group.id, item: group)
                 }
@@ -58,8 +56,64 @@ struct GroupsView: View {
 
 }
 
+
+struct GroupsSelectionView: View {
+
+    @Binding var selectedGroup: GroupDisplayItem
+    @State var viewModel: GroupsViewModel
+    @State private var searchText = ""
+    @Environment(\.dismiss) var dismiss
+
+    private var filteredGroups: [GroupDisplayItem] {
+        if searchText.isEmpty {
+            viewModel.groups
+        } else {
+            viewModel.groups.filter {
+                $0.name.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+    
+    var body: some View {
+        NavigationStack{
+            
+            List(filteredGroups){group in
+                HStack {
+                    if let image = group.image {
+                        image
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                    } else {
+                        Image(systemName: "airplane.circle.fill")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                    }
+                    Text(group.name)
+                        .padding()
+                    
+                }
+                .frame(width: .infinity, height: .infinity)
+                .onTapGesture {
+                    selectedGroup = group
+                    dismiss()
+                }
+            }
+            .listStyle(.automatic)
+            .navigationTitle("Select Group")
+            .navigationBarTitleDisplayMode(.inline)
+            .cancelToolBar {
+                dismiss()
+            }
+        }
+
+        .searchable(text: $searchText, prompt: "Search groups")
+
+    }
+}
+
 #Preview {
+    @Previewable @State var displayItem = GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense)
     Group{
-        GroupsView()
+        GroupsSelectionView(selectedGroup: $displayItem, viewModel: GroupsViewModel())
     }
 }

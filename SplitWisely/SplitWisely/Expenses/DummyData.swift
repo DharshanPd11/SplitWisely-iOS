@@ -9,14 +9,15 @@ import SwiftUI
 
 public struct DummyData {
     
-    var participants : [ParticipantCardView.DisplayItem] = [
+    static var participants : [ParticipantCardView.DisplayItem] = [
         ParticipantCardView.DisplayItem(
             id: 1,
             name: "Alice Johnson",
             description: "Team Lead",
             image: Image(systemName: "person.circle.fill"),
             expense: nil,
-            trailingView: .multiSelect(isSelected: true)
+            trailingView: .multiSelect(isSelected: true),
+            type: .individual
         ),
         ParticipantCardView.DisplayItem(
             id: 2,
@@ -32,7 +33,7 @@ public struct DummyData {
             description: "Designer",
             image: Image(systemName: "person.circle.fill"),
             expense: nil,
-            trailingView: .singleSelect(isSelected: false)
+            trailingView: .multiSelect(isSelected: false)
         ),
         ParticipantCardView.DisplayItem(
             id: 4,
@@ -40,7 +41,7 @@ public struct DummyData {
             description: "QA Engineer",
             image: Image(systemName: "person.circle.fill"),
             expense: nil,
-            trailingView: .singleSelect(isSelected: true)
+            trailingView: .multiSelect(isSelected: false)
         ),
         ParticipantCardView.DisplayItem(
             id: 5,
@@ -48,11 +49,11 @@ public struct DummyData {
             description: "Intern",
             image: Image(systemName: "person.circle"),
             expense: nil,
-            trailingView: .none
+            trailingView: .multiSelect(isSelected: false)
         )
     ]
 
-    var expenses : [ExpenseCardView.DisplayItem] = [
+    static var expenses : [ExpenseCardView.DisplayItem] = [
         ExpenseCardView.DisplayItem(
             id: 0,
             title: "Lunch Bill",
@@ -214,8 +215,11 @@ public struct DummyData {
             date: Calendar.current.date(byAdding: .day, value: -4, to: Date())!
         )
     ]
+    
+    static var groups: [GroupDisplayItem] = [ GroupDisplayItem(id: 10, icon: "", name: "Munnar", status: .settled), GroupDisplayItem(id: 11, icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending), GroupDisplayItem(id: 12, icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming), GroupDisplayItem(id: 14, icon: "", name: "Andaman and Nicobar", status: .noExpense), GroupDisplayItem(id: 13, icon: "", name: "Munnar", status: .settled), GroupDisplayItem(id: 15, icon: "", name: "New Delhi", expense: Amount(value: 100, currencyCode: "USD"), status: .pending), GroupDisplayItem(id: 16, icon: "", name: "Jammu and Kashmir", expense: Amount(value: -100, currencyCode: "USD"), status: .incoming), GroupDisplayItem(id: 17, icon: "", name: "Andaman and Nicobar", status: .noExpense)]
+    
     func getExpenses() -> [ExpenseCardView.DisplayItem] {
-        return expenses
+        return DummyData.expenses
     }
 }
 
