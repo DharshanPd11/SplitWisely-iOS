@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import FoundationModels
 
 enum ExpenseType {
     case medics
@@ -36,6 +37,8 @@ final class AddExpenseViewModel: ObservableObject {
 
     @Published var activeSheet: AddExpenseViewPresentables? = nil
     @Published var splitMode: PaymentSplitMode = .equal
+    
+    private let expenseGenerator = ExpenseExtractor()
     
     func addParticipant(_ participant: ParticipantCardView.DisplayItem) {
         participants.append(participant)
@@ -69,6 +72,33 @@ final class AddExpenseViewModel: ObservableObject {
     func dismiss() {
         activeSheet = nil
     }
+    
+    func selected(image: UIImage){
+        selectedImage = image
+        if expenseGenerator.isDeviceAICompatible(){
+            let textRecognizer = TextRecognizer()
+            textRecognizer.extractText(from: image) { extractedText in
+                Task { @MainActor in
+                    await self.process(text: extractedText)
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    private func process(text: String) async {
+        do {
+            let exp = try await expenseGenerator.extractExpense(from: text)
+            guard let exp else { return }
+
+            name = exp.title
+//            currency = exp.currency
+            amount = exp.amount
+        } catch {
+            print("❌ Failed to extract expense:", error)
+        }
+    }
+
 }
 
 struct AddExpenseView: View {

@@ -45,44 +45,9 @@ struct CameraPicker: UIViewControllerRepresentable {
     }
 }
 
-import Vision
-
-final class TextRecognizer {
-    func extractText(from image: UIImage, completion: @escaping (String) -> Void) {
-        guard let cgImage = image.cgImage else {
-            completion("No CGImage found")
-            return
-        }
-
-        let request = VNRecognizeTextRequest { request, error in
-            guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                completion("No text found")
-                return
-            }
-
-            let text = observations.compactMap {
-                $0.topCandidates(1).first?.string
-            }.joined(separator: "\n")
-
-            completion(text)
-        }
-
-        request.recognitionLanguages = ["en-US"]
-        request.recognitionLevel = .accurate
-
-        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        DispatchQueue.global(qos: .userInitiated).async {
-            try? handler.perform([request])
-        }
-    }
-}
 
 struct PhotoCaptureView: View {
     @ObservedObject var viewModel: AddExpenseViewModel
-//    @State private var showCamera = true
-//    @State private var recognizedText = ""
-//    private let recognizer = TextRecognizer()
-    
     var isAuthorized: Bool {
         get async {
             let status = AVCaptureDevice.authorizationStatus(for: .video)
@@ -127,22 +92,12 @@ struct PhotoCaptureView: View {
 //            }
         }
         .padding()
-        .fullScreenCover(isPresented: $showCamera, onDismiss: {}){
-    
+        .fullScreenCover(isPresented: $showCamera, onDismiss: { dismiss() }){
             CameraPicker { capturedImage in
-                viewModel.selectedImage = capturedImage
+                viewModel.selected(image: capturedImage)
                 dismiss()
             }
         }
-//        .sheet(isPresented: $showCamera) {
-//            CameraPicker { image in
-//                recognizer.extractText(from: image) { text in
-//                    DispatchQueue.main.async {
-//                        recognizedText = text
-//                    }
-//                }
-//            }
-//        }
     }
 }
 
