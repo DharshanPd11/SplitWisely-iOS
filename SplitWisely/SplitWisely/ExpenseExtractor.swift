@@ -4,6 +4,8 @@
 //
 //  Created by Priyadharshan Raja on 15/11/25.
 //
+import FoundationModels
+import SwiftUI
 
 final class ExpenseExtractor{
     private let session: LanguageModelSession
