@@ -7,7 +7,12 @@
 import FoundationModels
 import SwiftUI
 
-final class ExpenseExtractor{
+protocol ExpenseExtractionProtocol: AnyObject{
+    func isDeviceAICompatible() -> Bool
+    func extractExpense(from text: String) async throws -> TextExtractedExpense?
+}
+
+final class ExpenseExtractor: ExpenseExtractionProtocol{
     private let session: LanguageModelSession
     private(set) var expense: TextExtractedExpense?
     private let model = SystemLanguageModel.default

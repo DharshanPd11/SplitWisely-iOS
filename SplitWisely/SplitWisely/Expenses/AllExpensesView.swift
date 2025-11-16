@@ -57,7 +57,7 @@ struct AllExpensesView: View {
             }
                 .fullScreenCover(isPresented: $showAddExpenseSheet,
                                  onDismiss: didDismiss) {
-                                     AddExpenseView(viewModel: AddExpenseViewModel(), onSave: { newExpense in
+                                     AddExpenseView(viewModel: AddExpenseViewModel(group: viewModel.groupDetail, expenseGenerator: ExpenseExtractor()), onSave: { newExpense in
                                          viewModel.expenses.append(newExpense)
                                      })
                                  }

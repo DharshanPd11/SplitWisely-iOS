@@ -15,7 +15,7 @@ struct ManageParticipantsView: View {
     var body: some View {
         VStack{
             HStack{
-                ParticipantsCollectionView(presentAddParticipantsSheet: $presentAddParticipantsSheet, selectedParticipant: $addExpenseVM.participants)
+                ParticipantsCollectionView(presentAddParticipantsSheet: $presentAddParticipantsSheet, selectedParticipant: $addExpenseVM.expense.participants)
                 Spacer()
             }
                 .padding(.bottom)
@@ -87,5 +87,5 @@ struct ParticipantsCollectionView: View {
 }
 
 #Preview {
-    AddExpenseView(viewModel: AddExpenseViewModel(), onSave: {_ in })
+    AddExpenseView(viewModel: AddExpenseViewModel(group: GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense), expenseGenerator: ExpenseExtractor()), onSave: {_ in })
 }

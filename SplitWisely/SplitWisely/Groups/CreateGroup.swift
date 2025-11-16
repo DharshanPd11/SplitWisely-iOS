@@ -48,7 +48,7 @@ struct CreateGroup: View {
                         GroupNameField(name: $viewModel.name)
                     }
                     .photosPicker(isPresented: $showPicker, selection: $selectedItem, matching: .images)
-                    .onChange(of: selectedItem) { newItem in
+                    .onChange(of: selectedItem) { _, newItem in
                         Task {
                             if let data = try? await newItem?.loadTransferable(type: Data.self),
                                let uiImage = UIImage(data: data) {
