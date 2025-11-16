@@ -59,10 +59,6 @@ struct AllCurrenciesView: View {
             }
         }
     }
-//
-//    func dismiss() {
-//
-//    }
     
     private func filterCurrencies() {
         if searchText.isEmpty {

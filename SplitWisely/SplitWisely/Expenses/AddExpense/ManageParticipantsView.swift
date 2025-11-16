@@ -15,13 +15,14 @@ struct ManageParticipantsView: View {
     var body: some View {
         VStack{
             HStack{
-                ParticipantsCollectionView(presentAddParticipantsSheet: $presentAddParticipantsSheet, selectedParticipant: $addExpenseVM.participants)
+                ParticipantsCollectionView(presentAddParticipantsSheet: $presentAddParticipantsSheet, selectedParticipant: $addExpenseVM.expense.participants)
                 Spacer()
             }
                 .padding(.bottom)
                 .onChange(of: presentAddParticipantsSheet) { _, shouldPresent in
                     if shouldPresent {
                         addExpenseVM.showAddParticipant()
+                        presentAddParticipantsSheet = false
                     }
                 }
             
@@ -33,27 +34,51 @@ struct ManageParticipantsView: View {
     }
 }
 
+enum ChipItem: Identifiable {
+    case participant(ParticipantCardView.DisplayItem)
+    case add
+
+    var id: String {
+        switch self {
+        case .add: return "add-chip"
+        case .participant(let p): return "\(p.id)"
+        }
+    }
+}
+
 struct ParticipantsCollectionView: View {
     @Binding var presentAddParticipantsSheet: Bool
     @Binding var selectedParticipant: [ParticipantCardView.DisplayItem]
 
+    var items: [ChipItem] {
+        selectedParticipant.map { .participant($0) } + [.add]
+     }
+    
     var columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 10) {
-            ForEach(Array(selectedParticipant.enumerated()), id: \.element.id) { index, participant in
-                UIFactory.ChipsView(
-                    title: participant.name,
-                    bg: nil,
-                    onRemove: {
-                        selectedParticipant.remove(at: index)
+            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                switch item{
+                case .add:
+                    Button {
+                        presentAddParticipantsSheet = true
+                    } label: {
+                        UIFactory.ChipsView(title: "Add +", bg: Color.blue, onRemove: nil)
                     }
-                )
-                if index == selectedParticipant.count - 1 {
-                    UIFactory.ChipsView(title: "Add +", bg: Color.blue , onRemove: nil)
-                        .onTapGesture {
-                            presentAddParticipantsSheet = true
+                    .buttonStyle(.plain)
+
+                case .participant(let p):
+                    let onRemoveClosure : ()-> Void = {
+                        if index < items.count{
+                            selectedParticipant.remove(at: index)
                         }
+                    }
+                    UIFactory.ChipsView(
+                        title: p.name,
+                        bg: nil,
+                        onRemove: items.count != 2 ? onRemoveClosure : nil
+                    )
                 }
             }
         }
@@ -62,5 +87,5 @@ struct ParticipantsCollectionView: View {
 }
 
 #Preview {
-//    AddExpenseView(viewModel: AddExpenseViewModel())
+    AddExpenseView(viewModel: AddExpenseViewModel(group: GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense), expenseGenerator: ExpenseExtractor()), onSave: {_ in })
 }

@@ -15,26 +15,27 @@ struct Participant: Identifiable, Codable {
 }
 
 struct Expense: Identifiable {
-    let id: UUID
-    
-    var title: String
-    var totalAmount: Amount
-    var date: Date?
-    var paidBy: Participant
-    var participants: [Participant]
-    
-    var type: ExpenseInvovementType
-    
-    var note: String?
-    var receipt: Image?
-    var addedDate: Date
-
-    // Computed properties for UI
-    var amountForCurrentUser: Double {
-        // For example, assuming current user is one of the participants
-        participants.first(where: { $0.id == currentUserID })?.amountOwed ?? 0
-    }
-    
     // Current user ID can come from your auth/session manager
     var currentUserID: UUID = UUID()
+
+    let id: UUID    
+    var group: GroupDisplayItem
+    var name: String
+    var amount: Decimal
+    var currency: Currency
+    var date: Date?
+    var paidBy: ParticipantCardView.DisplayItem
+    var splitMode: PaymentSplitMode
+    var participants: [ParticipantCardView.DisplayItem]
+//    var type: ExpenseInvolvementType
+    var notes: String = ""
+    var receiptImage: UIImage?
+    var addedDate: Date
+    var expenseDate: Date?
+    
+    // Computed properties for UI
+//    var amountForCurrentUser: Double {
+//        participants.first(where: { $0.id == currentUserID })?.amountOwed ?? 0
+//    }
+    
 }

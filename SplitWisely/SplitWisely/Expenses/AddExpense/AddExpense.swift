@@ -20,36 +20,29 @@ enum ExpenseType {
 
 final class AddExpenseViewModel: ObservableObject {
     
-    @Published var group: GroupDisplayItem = GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense)
-    @Published var name: String = ""
-    @Published var amount: Decimal = 0.00
-    @Published var currency: Currency = AllCurrencies().currentCurrency
-    @Published var selectedImage: UIImage?
-    @Published var selectedExpenseType: ExpenseType = .none
-    @Published var addedDate: Date = Date()
-    @Published var expenseDate: Date = Date()
-    
+    @Published var expense: Expense
+        
     @Published var selectPayerVM = PayerViewModel()
-    @Published var paidBy : ParticipantCardView.DisplayItem = DummyData.participants[0]
-    
     @Published var participantsVM = AllParticipantsViewModel(participants: DummyData.participants)
-    @Published var participants : [ParticipantCardView.DisplayItem] = DummyData.participants
-
     @Published var activeSheet: AddExpenseViewPresentables? = nil
-    @Published var splitMode: PaymentSplitMode = .equal
+        
+    private let expenseGenerator: ExpenseExtractionProtocol
     
-    private let expenseGenerator = ExpenseExtractor()
-    
-    func addParticipant(_ participant: ParticipantCardView.DisplayItem) {
-        participants.append(participant)
+    init(group: GroupDisplayItem, expenseGenerator: ExpenseExtractionProtocol) {
+        self.expense = Expense(id: UUID(),
+                               group: group, name: "",
+                               amount: 0.00, currency: AllCurrencies().currentCurrency,
+                               paidBy: DummyData.participants[0],
+                               splitMode: .equal, participants: DummyData.participants, addedDate: Date())
+        self.expenseGenerator = expenseGenerator
     }
     
-    func selectGroupType(_ type: ExpenseType) {
-        selectedExpenseType = type
+    func addParticipant(_ participant: ParticipantCardView.DisplayItem) {
+        expense.participants.append(participant)
     }
     
     func addExpense() -> ExpenseCardView.DisplayItem{
-       let newExpense = ExpenseCardView.DisplayItem(id: DummyData.expenses.count + 1, title: name, description: "", expense: Amount(value: amount, currencyCode: currency.code), type: ExpenseInvovementType.borrowed, date: Date())
+        let newExpense = ExpenseCardView.DisplayItem(id: DummyData.expenses.count + 1, title: expense.name, description: expense.notes, expense: Amount(value: expense.amount, currencyCode: expense.currency.code), type: ExpenseInvolvementType.borrowed, date: Date())
         return newExpense
     }
     
@@ -68,13 +61,17 @@ final class AddExpenseViewModel: ObservableObject {
     func showDatePickerView() {
         activeSheet = .datePicker
     }
+    
+    func showNotesView() {
+        activeSheet = .notes
+    }
 
     func dismiss() {
         activeSheet = nil
     }
     
     func selected(image: UIImage){
-        selectedImage = image
+        expense.receiptImage = image
         if expenseGenerator.isDeviceAICompatible(){
             let textRecognizer = TextRecognizer()
             textRecognizer.extractText(from: image) { extractedText in
@@ -91,9 +88,9 @@ final class AddExpenseViewModel: ObservableObject {
             let exp = try await expenseGenerator.extractExpense(from: text)
             guard let exp else { return }
 
-            name = exp.title
+            expense.name = exp.title
 //            currency = exp.currency
-            amount = exp.amount
+            expense.amount = exp.amount
         } catch {
             print("❌ Failed to extract expense:", error)
         }
@@ -156,7 +153,7 @@ struct AddExpenseView: View {
                         viewModel.showSelectCurrency()
                     } label: {
                         ZStack{
-                            Text(viewModel.currency.symbol)
+                            Text(viewModel.expense.currency.symbol)
                                 .font(.system(size: 100))
                                 .minimumScaleFactor(0.1)
                                 .lineLimit(1)
@@ -190,14 +187,14 @@ struct AddExpenseView: View {
                 HStack{
                     Text("Paid by: ")
                     
-                    Button(viewModel.paidBy.name, role: .confirm, action: {
+                    Button(viewModel.expense.paidBy.name, role: .confirm, action: {
                         viewModel.showSelectPayerSheet()
                     })
                     .buttonStyle(.glass)
                     
                     Text("and split ")
                     
-                    Button("\(viewModel.splitMode.title)", role: .confirm, action: {
+                    Button("\(viewModel.expense.splitMode.title)", role: .confirm, action: {
                         viewModel.showAddParticipant()
                     })
                     
@@ -206,7 +203,7 @@ struct AddExpenseView: View {
                 .padding(.top)
                 .font(.caption)
                 
-                if let _ = viewModel.selectedImage {
+                if let _ = viewModel.expense.receiptImage {
                     HStack{
                         Image(systemName: "paperclip")
                         Text("Image Attached")
@@ -232,33 +229,35 @@ struct AddExpenseView: View {
             .fullScreenCover(item: $viewModel.activeSheet, onDismiss: didDismiss) { item in
                 switch item {
                 case .selectCurrency:
-                    AllCurrenciesView(selectedCurrency: $viewModel.currency)
+                    AllCurrenciesView(selectedCurrency: $viewModel.expense.currency)
                 case .addParticipant:
                     AllParticipantsView(viewModel: viewModel.participantsVM, didFinishPickingParticipants: $didFinishPickingParticipants)
                 case .datePicker:
-                    ExpenseDateView(expenseDate: $viewModel.expenseDate)
+                    ExpenseDateView(expenseDate: $viewModel.expense.addedDate)
                 case .selectGroup:
-                    GroupsSelectionView(selectedGroup: $viewModel.group, viewModel: GroupsViewModel())
+                    GroupsSelectionView(selectedGroup: $viewModel.expense.group, viewModel: GroupsViewModel())
                 case .payer:
                     SelectPayerView(viewModel: viewModel.selectPayerVM, didFinishpickingPayer: $didFinishPickingPayer)
                 case .camera:
                     PhotoCaptureView(viewModel: viewModel)
+                case .notes:
+                    NotesEditor(text: $viewModel.expense.notes)
                 default:
-                    ExpenseDateView(expenseDate: $viewModel.expenseDate)
+                    ExpenseDateView(expenseDate: $viewModel.expense.addedDate)
                 }
             }
             .onChange(of: didFinishPickingParticipants, {
-                viewModel.participants = viewModel.participantsVM.getSelectedParticipants()
+                viewModel.expense.participants = viewModel.participantsVM.getSelectedParticipants()
             })
             .onChange(of: didFinishPickingPayer, {
-                viewModel.paidBy = viewModel.selectPayerVM.selectedPayer ?? DummyData.participants[0]
+                viewModel.expense.paidBy = viewModel.selectPayerVM.selectedPayer ?? DummyData.participants[0]
             })
             .onChange(of: name, {
-                viewModel.name = name
+                viewModel.expense.name = name
             })
             .onChange(of: amount, {
                 if let decimalValue = Decimal(string: amount) {
-                    viewModel.amount = decimalValue
+                    viewModel.expense.amount = decimalValue
                 }
             })
         }
@@ -322,8 +321,6 @@ enum PaymentSplitMode: Identifiable {
 }
 
 #Preview {
-//    ExpenseFormView()
-    AddExpenseView(viewModel: AddExpenseViewModel(), onSave: {_ in 
-        
+    AddExpenseView(viewModel: AddExpenseViewModel(group: GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense), expenseGenerator: ExpenseExtractor()), onSave: {_ in
     })
 }

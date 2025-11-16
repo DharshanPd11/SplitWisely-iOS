@@ -13,13 +13,13 @@ struct ExpenseAccessoryView: View {
     
     var body: some View {
         HStack{
-            DateButton(expenseDate: $expenseAccessoryViewModel.expenseDate, toPresent: $expenseAccessoryViewModel.activeSheet)
+            DateButton(expenseDate: $expenseAccessoryViewModel.expense.addedDate, toPresent: $expenseAccessoryViewModel.activeSheet)
             Spacer()
-            GroupNameButton(group: $expenseAccessoryViewModel.group, toPresent: $expenseAccessoryViewModel.activeSheet)
+            GroupNameButton(group: $expenseAccessoryViewModel.expense.group, toPresent: $expenseAccessoryViewModel.activeSheet)
             Spacer()
             OpenCameraButton(toPresent: $expenseAccessoryViewModel.activeSheet)
             Spacer()
-            NotesButton()
+            NotesButton(toPresent: $expenseAccessoryViewModel.activeSheet)
         }
     }
     
@@ -74,9 +74,11 @@ struct ExpenseAccessoryView: View {
         }
     }
     struct NotesButton: View {
+        @Binding var toPresent: AddExpenseViewPresentables?
+
         var body: some View {
             Button(action: {
-                //
+                toPresent = .notes
             }) {
                 Image(systemName: "pencil.and.list.clipboard")
                     .foregroundColor(.primary)
