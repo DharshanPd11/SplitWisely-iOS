@@ -22,8 +22,6 @@ final class ExpenseExtractor: ExpenseExtractionProtocol{
     init() {
         self.session = LanguageModelSession {
             "You are a expense extracting agent, you need to extract an expense information like title, amount and the currency from the text extracted from an image most probably a bill or receipt"
-            """
-            """
         }
     }
     
