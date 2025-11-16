@@ -19,7 +19,7 @@ struct ExpenseAccessoryView: View {
             Spacer()
             OpenCameraButton(toPresent: $expenseAccessoryViewModel.activeSheet)
             Spacer()
-            NotesButton()
+            NotesButton(toPresent: $expenseAccessoryViewModel.activeSheet)
         }
     }
     
@@ -74,9 +74,11 @@ struct ExpenseAccessoryView: View {
         }
     }
     struct NotesButton: View {
+        @Binding var toPresent: AddExpenseViewPresentables?
+
         var body: some View {
             Button(action: {
-                //
+                toPresent = .notes
             }) {
                 Image(systemName: "pencil.and.list.clipboard")
                     .foregroundColor(.primary)

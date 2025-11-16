@@ -38,6 +38,8 @@ final class AddExpenseViewModel: ObservableObject {
     @Published var activeSheet: AddExpenseViewPresentables? = nil
     @Published var splitMode: PaymentSplitMode = .equal
     
+    @Published var notes: String = ""
+    
     private let expenseGenerator = ExpenseExtractor()
     
     func addParticipant(_ participant: ParticipantCardView.DisplayItem) {
@@ -67,6 +69,10 @@ final class AddExpenseViewModel: ObservableObject {
     
     func showDatePickerView() {
         activeSheet = .datePicker
+    }
+    
+    func showNotesView() {
+        activeSheet = .notes
     }
 
     func dismiss() {
@@ -243,6 +249,8 @@ struct AddExpenseView: View {
                     SelectPayerView(viewModel: viewModel.selectPayerVM, didFinishpickingPayer: $didFinishPickingPayer)
                 case .camera:
                     PhotoCaptureView(viewModel: viewModel)
+                case .notes:
+                    NotesEditor(text: $viewModel.notes)
                 default:
                     ExpenseDateView(expenseDate: $viewModel.expenseDate)
                 }

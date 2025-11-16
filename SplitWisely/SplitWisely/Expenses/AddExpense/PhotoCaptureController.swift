@@ -66,31 +66,7 @@ struct PhotoCaptureView: View {
     @State private var showCamera = true
     @Environment(\.dismiss) var dismiss
     var body: some View {
-        VStack {
-//            Text("Extracted Text:")
-//                .font(.headline)
-//
-//            ScrollView {
-//                Text(recognizedText.isEmpty ? "No text yet" : recognizedText)
-//                    .padding()
-//                    .frame(maxWidth: .infinity, alignment: .leading)
-//                    .background(Color.gray.opacity(0.1))
-//                    .cornerRadius(8)
-//            }
-//            .frame(height: 300)
-//
-//            Button {
-//                showCamera = true
-//            } label: {
-//                Label("Capture Photo", systemImage: "camera")
-//                    .font(.headline)
-//                    .padding()
-//                    .frame(maxWidth: .infinity)
-//                    .background(Color.blue)
-//                    .foregroundColor(.white)
-//                    .cornerRadius(10)
-//            }
-        }
+        VStack { }
         .padding()
         .fullScreenCover(isPresented: $showCamera, onDismiss: { dismiss() }){
             CameraPicker { capturedImage in

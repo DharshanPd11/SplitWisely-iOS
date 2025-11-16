@@ -21,7 +21,9 @@ struct UIFactory {
                         .font(.caption)
                     if let onRemove = onRemove {
                         Button{
-                            onRemove()
+                            withAnimation{
+                                onRemove()
+                            }
                         } label: {
                             Image(systemName: "xmark.circle.fill")
                                 .resizable()
