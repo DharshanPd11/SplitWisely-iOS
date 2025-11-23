@@ -9,6 +9,17 @@ import SwiftUI
 
 public struct DummyData {
     
+        static let SplitParticipanta: [Participant] = [
+            Participant(id: UUID(), name: "Priya", amountOwed: 0),
+            Participant(id: UUID(), name: "Akash", amountOwed: 1500),
+            Participant(id: UUID(), name: "Naveen", amountOwed: -800),
+            Participant(id: UUID(), name: "Harini", amountOwed: 250),
+            Participant(id: UUID(), name: "Sakura", amountOwed: -1200),
+            Participant(id: UUID(), name: "Dinesh", amountOwed: 0),
+            Participant(id: UUID(), name: "Meera", amountOwed: 500),
+            Participant(id: UUID(), name: "Sanjay", amountOwed: -300)
+        ]
+
     static var participants : [ParticipantCardView.DisplayItem] = [
         ParticipantCardView.DisplayItem(
             id: 1,

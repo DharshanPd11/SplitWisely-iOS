@@ -12,6 +12,8 @@ struct Participant: Identifiable, Codable {
     let id: UUID
     let name: String
     var amountOwed: Double
+    var sharesOwed: Int?
+    var percentOwed: Double?
 }
 
 struct Expense: Identifiable {
