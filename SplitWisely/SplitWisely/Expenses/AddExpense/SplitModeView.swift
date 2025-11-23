@@ -33,7 +33,7 @@ struct SplitModeView: View {
                 Text("Amount")
                 Text("\(viewModel.totalToBeSplit.currencyCode) \(viewModel.totalToBeSplit.value)")
                     .font(.title)
-                LazyHGrid(rows: [GridItem(.fixed(50), spacing: 20)]){
+                LazyHGrid(rows: [GridItem(.fixed(45), spacing: 20)]){
                     ForEach(splitModes) { mode in
                         Button {
                             withAnimation{
@@ -51,8 +51,9 @@ struct SplitModeView: View {
                         .buttonStyle(.plain)
                     }
                 }
+                .frame(maxHeight: 45)
+                
                 ParticipantSplitView(viewModel: viewModel)
-                Spacer()
             }
             .navigationTitle("Split Mode")
             .navigationBarTitleDisplayMode(.inline)
@@ -71,8 +72,12 @@ struct ParticipantSplitView: View {
     @ObservedObject var viewModel: SplitViewModel
     
     var body: some View {
-        List($viewModel.participants){ participant in
-            Card(splitMode: $viewModel.splitMode, item: participant)
+        VStack{
+            List($viewModel.participants){ participant in
+                Card(splitMode: $viewModel.splitMode, item: participant)
+            }
+            .scrollIndicators(.hidden)
+            .listStyle(.grouped)
         }
     }
     

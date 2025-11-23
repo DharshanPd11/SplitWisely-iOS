@@ -383,7 +383,7 @@
 	"code": "ILS",
 	"name_plural": "Israeli new sheqels"
 }, {
-	"symbol": "Rs",
+	"symbol": "₹",
 	"name": "Indian Rupee",
 	"symbol_native": "টকা",
 	"decimal_digits": 2,

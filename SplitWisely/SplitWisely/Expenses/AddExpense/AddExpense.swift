@@ -7,7 +7,7 @@
 
 import SwiftUI
 import Combine
-import FoundationModels
+import Foundation
 
 enum ExpenseType {
     case medics
@@ -18,85 +18,7 @@ enum ExpenseType {
     case none
 }
 
-final class AddExpenseViewModel: ObservableObject {
-    
-    @Published var expense: Expense
-        
-    @Published var selectPayerVM = PayerViewModel()
-    @Published var participantsVM = AllParticipantsViewModel(participants: DummyData.participants)
-    @Published var activeSheet: AddExpenseViewPresentables? = nil
-        
-    private let expenseGenerator: ExpenseExtractionProtocol
-    
-    init(group: GroupDisplayItem, expenseGenerator: ExpenseExtractionProtocol) {
-        self.expense = Expense(id: UUID(),
-                               group: group, name: "",
-                               amount: 0.00, currency: AllCurrencies().currentCurrency,
-                               paidBy: DummyData.participants[0],
-                               splitMode: .equal, participants: DummyData.participants, addedDate: Date())
-        self.expenseGenerator = expenseGenerator
-    }
-    
-    func addParticipant(_ participant: ParticipantCardView.DisplayItem) {
-        expense.participants.append(participant)
-    }
-    
-    func addExpense() -> ExpenseCardView.DisplayItem{
-        let newExpense = ExpenseCardView.DisplayItem(id: DummyData.expenses.count + 1, title: expense.name, description: expense.notes, expense: Amount(value: expense.amount, currencyCode: expense.currency.code), type: ExpenseInvolvementType.borrowed, date: Date())
-        return newExpense
-    }
-    
-    func showSelectCurrency() {
-        activeSheet = .selectCurrency
-    }
 
-    func showSelectPayerSheet(){
-        activeSheet = .payer
-    }
-    
-    func showAddParticipant() {
-        activeSheet = .addParticipant
-    }
-    
-    func showDatePickerView() {
-        activeSheet = .datePicker
-    }
-    
-    func showNotesView() {
-        activeSheet = .notes
-    }
-
-    func dismiss() {
-        activeSheet = nil
-    }
-    
-    func selected(image: UIImage){
-        expense.receiptImage = image
-        if expenseGenerator.isDeviceAICompatible(){
-            let textRecognizer = TextRecognizer()
-            textRecognizer.extractText(from: image) { extractedText in
-                Task { @MainActor in
-                    await self.process(text: extractedText)
-                }
-            }
-        }
-    }
-    
-    @MainActor
-    private func process(text: String) async {
-        do {
-            let exp = try await expenseGenerator.extractExpense(from: text)
-            guard let exp else { return }
-
-            expense.name = exp.title
-//            currency = exp.currency
-            expense.amount = exp.amount
-        } catch {
-            print("❌ Failed to extract expense:", error)
-        }
-    }
-
-}
 
 struct AddExpenseView: View {
     
@@ -195,7 +117,7 @@ struct AddExpenseView: View {
                     Text("and split ")
                     
                     Button("\(viewModel.expense.splitMode.title)", role: .confirm, action: {
-                        viewModel.showAddParticipant()
+                        viewModel.showExpenseSplitView()
                     })
                     
                     .buttonStyle(.glass)
@@ -242,8 +164,10 @@ struct AddExpenseView: View {
                     PhotoCaptureView(viewModel: viewModel)
                 case .notes:
                     NotesEditor(text: $viewModel.expense.notes)
+                case .splitModeView:
+                    SplitModeView(viewModel: viewModel.getSplitViewModel())
                 default:
-                    ExpenseDateView(expenseDate: $viewModel.expense.addedDate)
+                    NotesEditor(text: $viewModel.expense.notes)
                 }
             }
             .onChange(of: didFinishPickingParticipants, {
@@ -276,6 +200,7 @@ enum AddExpenseViewPresentables: Identifiable {
     case datePicker
     case selectGroup
     case attachPhotos
+    case splitModeView
     case payer
     case camera
     case notes
@@ -290,32 +215,7 @@ enum AddExpenseViewPresentables: Identifiable {
         case .notes: return "notes"
         case .payer: return "Payer"
         case .camera: return "camera"
-        }
-    }
-}
-
-enum PaymentSplitMode: Identifiable {
-    case equal
-    case custom
-    case percent
-    case shares
-    case adjustments
-    
-    var id: String{
-        switch self {
-        case .equal: return "equal"
-        case .custom: return "custom"
-        case .percent: return "percent"
-        case .shares: return "shares"
-        case .adjustments: return "adjustments"
-        }
-    }
-    
-    var title: String{
-        switch self {
-        case .equal: return "Equally"
-        default:
-            return "Unequally"
+        case .splitModeView: return "splitModeView"
         }
     }
 }

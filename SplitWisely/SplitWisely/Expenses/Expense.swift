@@ -27,7 +27,7 @@ struct Expense: Identifiable {
     var currency: Currency
     var date: Date?
     var paidBy: ParticipantCardView.DisplayItem
-    var splitMode: PaymentSplitMode
+    var splitMode: ExpenseSplitMode
     var participants: [ParticipantCardView.DisplayItem]
 //    var type: ExpenseInvolvementType
     var notes: String = ""

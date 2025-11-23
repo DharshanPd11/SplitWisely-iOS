@@ -27,7 +27,8 @@ struct AllExpensesView: View {
                                 ExpenseCardView(id: expense.id, item: expense)
                                     .padding(.horizontal)
                                 
-                            }.buttonStyle(.plain)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
