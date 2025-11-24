@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct Participant: Identifiable, Codable {
     let id: UUID
     let name: String

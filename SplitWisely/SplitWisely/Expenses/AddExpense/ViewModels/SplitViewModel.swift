@@ -41,16 +41,26 @@ enum ExpenseSplitMode{
     }
 }
 
-class SplitViewModel: ObservableObject{
-    @Published var splitMode: ExpenseSplitMode = .manual
+protocol SplitViewModelProtocol: AnyObject {
+    var splitMode: ExpenseSplitMode { get set }
+    var participants: [Participant] { get set }
+    var totalToBeSplit: Amount { get set }
+    var shares: Int { get set }
+    
+    func reCalculate(with: Participant)
+}
+
+class SplitViewModel: ObservableObject, SplitViewModelProtocol {
+    @Published var splitMode: ExpenseSplitMode
     @Published var participants: [Participant]
     @Published var totalToBeSplit: Amount
     @Published var shares: Int = 0
     
-    init(splitMode: ExpenseSplitMode, participants: [Participant], totalToBeSplit: Amount) {
+    init(splitMode: ExpenseSplitMode, participants: [Participant], totalToBeSplit: Amount, shares: Int) {
         self.splitMode = splitMode
         self.participants = participants
         self.totalToBeSplit = totalToBeSplit
+        self.shares = shares
     }
     
     func reCalculate(with: Participant) {

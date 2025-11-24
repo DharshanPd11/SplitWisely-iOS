@@ -13,15 +13,18 @@ final class AddExpenseViewModel: ObservableObject {
     
     @Published var expense: Expense
         
-    @Published var selectPayerVM = PayerViewModel()
-    @Published var participantsVM = AllParticipantsViewModel(participants: DummyData.participants)
-    @Published var splitVM = SplitViewModel(splitMode: .equal, participants: DummyData.SplitParticipanta, totalToBeSplit: Amount(value: 0, currencyCode: AllCurrencies().currentCurrency.code))
-    
+    @Published var selectPayerVM: PayerViewModelProtocol
+    @Published var participantsVM: AllParticipantsViewModelProtocol
+    @Published var splitVM: SplitViewModelProtocol
+
     @Published var activeSheet: AddExpenseViewPresentables? = nil
         
     private let expenseGenerator: ExpenseExtractionProtocol
     
-    init(group: GroupDisplayItem, expenseGenerator: ExpenseExtractionProtocol) {
+    init(group: GroupDisplayItem, expenseGenerator: ExpenseExtractionProtocol, selectPayerVM: PayerViewModelProtocol, participantsVM: AllParticipantsViewModelProtocol, splitVM: SplitViewModelProtocol ) {
+        self.selectPayerVM = selectPayerVM
+        self.participantsVM = participantsVM
+        self.splitVM = splitVM
         self.expense = Expense(id: UUID(),
                                group: group, name: "",
                                amount: 0.00, currency: AllCurrencies().currentCurrency,
@@ -30,7 +33,7 @@ final class AddExpenseViewModel: ObservableObject {
         self.expenseGenerator = expenseGenerator
     }
     
-    func getSplitViewModel() -> SplitViewModel{
+    func getSplitViewModel() -> SplitViewModelProtocol {
         splitVM.splitMode = expense.splitMode
         splitVM.totalToBeSplit = Amount(value: expense.amount, currencyCode: expense.currency.symbol)
         return splitVM

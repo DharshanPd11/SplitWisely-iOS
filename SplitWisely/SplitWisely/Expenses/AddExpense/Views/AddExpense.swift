@@ -18,8 +18,6 @@ enum ExpenseType {
     case none
 }
 
-
-
 struct AddExpenseView: View {
     
     @ObservedObject var viewModel: AddExpenseViewModel
@@ -153,19 +151,25 @@ struct AddExpenseView: View {
                 case .selectCurrency:
                     AllCurrenciesView(selectedCurrency: $viewModel.expense.currency)
                 case .addParticipant:
-                    AllParticipantsView(viewModel: viewModel.participantsVM, didFinishPickingParticipants: $didFinishPickingParticipants)
+                    if let allParticipantsVM = viewModel.participantsVM as? AllParticipantsViewModel {
+                        AllParticipantsView(viewModel: allParticipantsVM, didFinishPickingParticipants: $didFinishPickingParticipants)
+                    }
                 case .datePicker:
                     ExpenseDateView(expenseDate: $viewModel.expense.addedDate)
                 case .selectGroup:
                     GroupsSelectionView(selectedGroup: $viewModel.expense.group, viewModel: GroupsViewModel())
                 case .payer:
-                    SelectPayerView(viewModel: viewModel.selectPayerVM, didFinishpickingPayer: $didFinishPickingPayer)
+                    if let selectPayerVM = viewModel.selectPayerVM as? PayerViewModel {
+                        SelectPayerView(viewModel: selectPayerVM, didFinishpickingPayer: $didFinishPickingPayer)
+                    }
                 case .camera:
                     PhotoCaptureView(viewModel: viewModel)
                 case .notes:
                     NotesEditor(text: $viewModel.expense.notes)
                 case .splitModeView:
-                    SplitModeView(viewModel: viewModel.getSplitViewModel())
+                    if let splitVM = viewModel.getSplitViewModel() as? SplitViewModel{
+                        SplitModeView(viewModel: splitVM)
+                    }
                 default:
                     NotesEditor(text: $viewModel.expense.notes)
                 }
@@ -221,6 +225,14 @@ enum AddExpenseViewPresentables: Identifiable {
 }
 
 #Preview {
-    AddExpenseView(viewModel: AddExpenseViewModel(group: GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense), expenseGenerator: ExpenseExtractor()), onSave: {_ in
+    let participantsVM = AllParticipantsViewModel(participants: DummyData.participants)
+    let splitVM = SplitViewModel(splitMode: .equal, participants: DummyData.SplitParticipanta, totalToBeSplit: Amount(value: 0, currencyCode: AllCurrencies().currentCurrency.code), shares: 0)
+    
+    AddExpenseView( viewModel: AddExpenseViewModel(group: GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense),
+           expenseGenerator: ExpenseExtractor(),
+           selectPayerVM: PayerViewModel(),
+           participantsVM: participantsVM,
+           splitVM: splitVM),
+        onSave: {_ in
     })
 }

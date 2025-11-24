@@ -162,5 +162,5 @@ struct ParticipantSplitView: View {
 }
 
 #Preview{
-    SplitModeView(viewModel: SplitViewModel(splitMode: .manual, participants: DummyData.SplitParticipanta, totalToBeSplit: Amount(value: 2394, currencyCode: "INR")) )
+    SplitModeView(viewModel: SplitViewModel(splitMode: .manual, participants: DummyData.SplitParticipanta, totalToBeSplit: Amount(value: 2394, currencyCode: "INR"), shares: 0) )
 }

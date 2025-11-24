@@ -87,5 +87,15 @@ struct ParticipantsCollectionView: View {
 }
 
 #Preview {
-    AddExpenseView(viewModel: AddExpenseViewModel(group: GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense), expenseGenerator: ExpenseExtractor()), onSave: {_ in })
+    let participantsVM = AllParticipantsViewModel(participants: DummyData.participants)
+    let splitVM = SplitViewModel(splitMode: .equal, participants: DummyData.SplitParticipanta, totalToBeSplit: Amount(value: 0, currencyCode: AllCurrencies().currentCurrency.code), shares: 0)
+    
+    AddExpenseView( viewModel: AddExpenseViewModel(group: GroupDisplayItem(id: 0, icon: "", name: "No Group", status: .noExpense),
+           expenseGenerator: ExpenseExtractor(),
+           selectPayerVM: PayerViewModel(),
+           participantsVM: participantsVM,
+           splitVM: splitVM),
+        onSave: {_ in
+    })
+
 }

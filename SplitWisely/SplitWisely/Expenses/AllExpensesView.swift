@@ -58,7 +58,13 @@ struct AllExpensesView: View {
             }
                 .fullScreenCover(isPresented: $showAddExpenseSheet,
                                  onDismiss: didDismiss) {
-                                     AddExpenseView(viewModel: AddExpenseViewModel(group: viewModel.groupDetail, expenseGenerator: ExpenseExtractor()), onSave: { newExpense in
+                                     AddExpenseView( viewModel: AddExpenseViewModel(
+                                        group: viewModel.groupDetail,
+                                        expenseGenerator: ExpenseExtractor(),
+                                        selectPayerVM: PayerViewModel(),
+                                        participantsVM: AllParticipantsViewModel(participants: DummyData.participants),
+                                        splitVM: SplitViewModel(splitMode: .equal, participants: DummyData.SplitParticipanta, totalToBeSplit: Amount(value: 0.0, currencyCode: AllCurrencies().currentCurrency.code), shares: 0)),
+                                        onSave: { newExpense in
                                          viewModel.expenses.append(newExpense)
                                      })
                                  }
