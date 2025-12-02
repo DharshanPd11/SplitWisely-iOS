@@ -37,5 +37,5 @@ struct SelectPayerView: View {
 
 #Preview {
     @Previewable @State var payer = false
-    SelectPayerView(viewModel: PayerViewModel(), didFinishpickingPayer: $payer)
+    SelectPayerView(viewModel: PayerViewModel(participants: DummyData.participants, selectedPayerID: 0), didFinishpickingPayer: $payer)
 }

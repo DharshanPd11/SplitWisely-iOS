@@ -29,6 +29,13 @@ final class PayerViewModel: ObservableObject, PayerViewModelProtocol {
         }
     }
     
+    init(participants: [ParticipantCardView.DisplayItem], selectedPayerID: Int) {
+        self.participants = participants
+        for payer in participants where selectedPayerID == payer.id {
+            self.selectedPayer = payer
+        }
+    }
+    
     func selectedPayer(with id: Int) {
         guard let index = participants.firstIndex(where: { $0.id == id }) else { return }
         

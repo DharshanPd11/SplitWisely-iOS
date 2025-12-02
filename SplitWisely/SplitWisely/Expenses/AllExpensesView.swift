@@ -61,7 +61,7 @@ struct AllExpensesView: View {
                                      AddExpenseView( viewModel: AddExpenseViewModel(
                                         group: viewModel.groupDetail,
                                         expenseGenerator: ExpenseExtractor(),
-                                        selectPayerVM: PayerViewModel(),
+                                        selectPayerVM: PayerViewModel(participants: DummyData.participants, selectedPayerID: 0),
                                         participantsVM: AllParticipantsViewModel(participants: DummyData.participants),
                                         splitVM: SplitViewModel(splitMode: .equal, participants: DummyData.SplitParticipanta, totalToBeSplit: Amount(value: 0.0, currencyCode: AllCurrencies().currentCurrency.code), shares: 0)),
                                         onSave: { newExpense in
